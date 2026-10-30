@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Grana Kids — Protótipo</title>
+<title>Grana Kids — Protótipo frontend aprimorado</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
 <style>
@@ -61,18 +61,44 @@ html[data-theme="dark"] {
 }
 html[data-theme="dark"] .app-shell.theme-adult{ --surface:#171F1D; --ink:#E2ECE8; --ink-soft:#9AA8A3; }
 
-html[data-cb="on"]{
-  --success:#00507D; --success-ink:#00507D; --success-bg:#DCEBF5;
-  --pending:#8A5300; --pending-bg:#FCEBD0;
-  --danger:#8A3F68; --danger-bg:#F7E2EE;
-  --coral:#8A3F68;
+/* Paletas acessíveis selecionáveis: protanopia, deuteranopia e tritanopia.
+   Estados também usam texto, ícones e bordas, nunca apenas a cor. */
+html[data-cb="protanopia"]{
+  --primary:#176B8A; --primary-dark:#124F68; --primary-soft:#DCEFF5;
+  --success:#176B8A; --success-ink:#124F68; --success-bg:#DCEFF5;
+  --pending:#8A5700; --pending-bg:#FFF0D1; --danger:#704A9B; --danger-bg:#EEE5F7;
+  --coral:#704A9B; --gold:#8A5700; --gold-ink:#704600; --gold-soft:#FFF0D1;
+  --nav-active-bg:#DCEFF5; --nav-active-ink:#124F68; --focus:#176B8A;
 }
-html[data-cb="on"][data-theme="dark"]{
-  --success:#7EC8ED; --success-ink:#7EC8ED; --success-bg:#122A38;
-  --pending:#F2C177; --pending-bg:#3A2A10;
-  --danger:#EBAFD2; --danger-bg:#391B2E;
-  --coral:#EBAFD2;
+html[data-cb="deuteranopia"]{
+  --primary:#176B8A; --primary-dark:#124F68; --primary-soft:#DCEFF5;
+  --success:#176B8A; --success-ink:#124F68; --success-bg:#DCEFF5;
+  --pending:#9A5A00; --pending-bg:#FFF0D1; --danger:#8A3F68; --danger-bg:#F7E2EE;
+  --coral:#8A3F68; --gold:#9A5A00; --gold-ink:#704600; --gold-soft:#FFF0D1;
+  --nav-active-bg:#DCEFF5; --nav-active-ink:#124F68; --focus:#176B8A;
 }
+html[data-cb="tritanopia"]{
+  --primary:#176B4B; --primary-dark:#12563C; --primary-soft:#DDF2E7;
+  --success:#176B4B; --success-ink:#12563C; --success-bg:#DDF2E7;
+  --pending:#8A5700; --pending-bg:#FFF0D1; --danger:#9B3F35; --danger-bg:#F9E5E1;
+  --coral:#9B3F35; --gold:#8A5700; --gold-ink:#704600; --gold-soft:#FFF0D1;
+  --nav-active-bg:#DDF2E7; --nav-active-ink:#12563C; --focus:#176B4B;
+}
+html[data-theme="dark"][data-cb="protanopia"],html[data-theme="dark"][data-cb="deuteranopia"]{
+  --primary:#83CBE2; --primary-dark:#83CBE2; --primary-soft:#142D37;
+  --success:#83CBE2; --success-ink:#83CBE2; --success-bg:#142D37;
+  --pending:#F0C477; --pending-bg:#382B16; --danger:#D4B2EE; --danger-bg:#30233D;
+  --coral:#D4B2EE; --gold:#F0C477; --gold-ink:#F0C477; --gold-soft:#382B16;
+  --nav-active-bg:#142D37; --nav-active-ink:#83CBE2; --focus:#83CBE2;
+}
+html[data-theme="dark"][data-cb="tritanopia"]{
+  --primary:#80D5A8; --primary-dark:#80D5A8; --primary-soft:#142D22;
+  --success:#80D5A8; --success-ink:#80D5A8; --success-bg:#142D22;
+  --pending:#F0C477; --pending-bg:#382B16; --danger:#F0A69B; --danger-bg:#3A211E;
+  --coral:#F0A69B; --gold:#F0C477; --gold-ink:#F0C477; --gold-soft:#382B16;
+  --nav-active-bg:#142D22; --nav-active-ink:#80D5A8; --focus:#80D5A8;
+}
+
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
@@ -413,7 +439,7 @@ function icon(name, size){
 var db = {
   responsavel:{ nome:'Claudia Manoela', apelido:'claudia.m', emoji:'👩🏽' },
   tutelados:[
-    { id:'t1', nome:'Maria', idade:9, emoji:'🦊', corAvatar:'#E3F3EC', saldo:42.50, roupa:'👒',
+    { id:'t1', nome:'Maria', idade:9, emoji:'🦊', corAvatar:'#E3F3EC', saldo:42.50, roupa:'👒', pedidosPermitidos:['Bicicleta','Livro de aventuras','Jogo educativo','Caderno de desenho','Passeio em família'], permitirPedidoLivre:false,
       metas:[
         {id:'m1', nome:'Bicicleta nova', descricao:'Guardar para trocar de bicicleta por uma aro 20 vermelha.', total:250, dep:180, concluida:false},
         {id:'m2', nome:'Caderno de desenho', descricao:'Um caderno grande de folhas lisas para os desenhos da Maria.', total:30, dep:30, concluida:true},
@@ -433,7 +459,7 @@ var db = {
         {id:'s4', nome:'Carrinho de brinquedo', descricao:'Carrinho de brinquedo grande da loja do shopping.', valor:60, status:'recusada'}
       ]
     },
-    { id:'t2', nome:'João', idade:6, emoji:'🐼', corAvatar:'#FDF0D2', saldo:15.00, roupa:'🕶️',
+    { id:'t2', nome:'João', idade:6, emoji:'🐼', corAvatar:'#FDF0D2', saldo:15.00, roupa:'🕶️', pedidosPermitidos:['Bola de futebol','Quebra-cabeça','Livro infantil','Carrinho de brinquedo','Passeio em família'], permitirPedidoLivre:false,
       metas:[
         {id:'m5', nome:'Bola de futebol', descricao:'Uma bola nova para jogar no fim de semana.', total:40, dep:15, concluida:false},
         {id:'m6', nome:'Quebra-cabeça de dinossauros', descricao:'Quebra-cabeça de 100 peças.', total:25, dep:25, concluida:true}
@@ -462,7 +488,7 @@ var db = {
 var state = {
   screen:'login', tuteladoId:'t1', notifOpen:false, expandedGoal:null, senhaVisivel:false, modal:null,
   tema:'auto',
-  daltonico:false,
+  daltonismo:'nenhum',
   escala:1,
   pendenteSolic:null,
   chat:[],
@@ -601,7 +627,7 @@ function screenLogin(){
       '<button class="btn btn-ghost" data-action="esqueci-senha" style="width:auto;flex:1">Esqueci minha senha</button>' +
     '</div>' +
     '<div class="demo-box">' +
-      '<p><strong>Modo protótipo</strong> — sem conexão real com o back-end. Escolha por qual área deseja entrar para demonstração:</p>' +
+      '<p><strong>Modo demonstração</strong> — este frontend usa dados locais e não cria sessões reais. Escolha por qual área deseja entrar para demonstração:</p>' +
       '<div class="btn-row"><button class="btn btn-secondary btn-sm" data-action="demo-login" data-area="kids" style="flex:1">👧 Área da criança</button>' +
       '<button class="btn btn-secondary btn-sm" data-action="demo-login" data-area="adulto" style="flex:1">👤 Área do responsável</button></div>' +
       '<button class="btn btn-ghost btn-sm" data-action="go" data-screen="err404" style="margin-top:6px;display:block;width:100%;text-align:center;">Visualizar página de erro 404 (QA)</button>' +
@@ -619,8 +645,29 @@ function screenCadastro(){
       '<div class="field"><label for="c-senha2">Confirmar senha</label><input id="c-senha2" type="password" required></div>' +
       '<button class="btn btn-primary" type="submit">Cadastrar</button>' +
     '</form>' +
+    '<button class="btn btn-secondary" style="margin-top:10px" data-action="go" data-screen="vincular-crianca">Já tenho um código para vincular uma criança</button>' +
   '</div>';
 }
+function screenVincularCrianca(){
+  return '<div class="screen no-nav-pad">' +
+    '<div class="back-row" style="margin-top:8px"><button class="icon-btn" data-action="go" data-screen="cadastro" aria-label="Voltar">'+icon('chevronLeft',20)+'</button><h1 style="margin:0">Vincular criança</h1></div>' +
+    '<p class="muted" style="margin:12px 0 18px">O responsável pode informar o código de convite apresentado no perfil da criança para associar os perfis nesta demonstração.</p>' +
+    '<form data-form="vincular"><div class="field"><label for="v-codigo">Código de convite</label><input id="v-codigo" required maxlength="12" placeholder="Ex.: GK-123456" autocomplete="off"></div>' +
+    '<button class="btn btn-primary" type="submit">Validar código</button></form>' +
+    '<div class="card muted" style="margin-top:16px">Fluxo visual demonstrativo. O vínculo real deverá ser confirmado pelo responsável e validado pelo servidor; não use códigos ou dados reais neste protótipo.</div>' +
+    '</div>';
+}
+
+function screenRecuperarSenha(){
+  return '<div class="screen no-nav-pad">' +
+    '<div class="back-row" style="margin-top:8px"><button class="icon-btn" data-action="go" data-screen="login" aria-label="Voltar">'+icon('chevronLeft',20)+'</button><h1 style="margin:0">Recuperar acesso</h1></div>' +
+    '<p class="muted" style="margin:12px 0 18px">Informe o e-mail cadastrado para ver a demonstração do fluxo de recuperação.</p>' +
+    '<form data-form="recuperar"><div class="field"><label for="r-email">E-mail</label><input id="r-email" type="email" required autocomplete="email" placeholder="voce@exemplo.com"></div>' +
+    '<button class="btn btn-primary" type="submit">Continuar</button></form>' +
+    '<div class="card muted" style="margin-top:16px">Demonstração visual: nenhum e-mail será enviado porque este protótipo não possui serviço de autenticação conectado.</div>' +
+    '</div>';
+}
+
 function screen404(){
   return '<div class="screen no-nav-pad" style="display:flex;align-items:center;justify-content:center;text-align:center;min-height:100%">' +
     '<div>' +
@@ -717,7 +764,7 @@ function screenKidsTarefas(){
   var u=ui();
   return topbarKids(u.tituloTarefas) +
   '<div class="screen">' +
-    '<button class="btn btn-primary fab-row" data-action="modal" data-modal="nova-tarefa">'+icon('plus',18)+' '+esc(u.novaTarefa)+'</button>' +
+    '<div class="card card-tight muted" style="margin-bottom:12px">As tarefas são combinadas e cadastradas pelo seu responsável. Veja abaixo o que foi preparado para você.</div>' +
     '<h2>Pendentes</h2>' +
     (pend.length? pend.map(function(x){return '<div class="tile tile-pending"><div class="tile-title">'+esc(x.nome)+'</div><div class="tile-desc">'+esc(x.descricao)+'</div><div class="tile-foot"><span class="reward">'+icon('coin',15)+brl(x.recompensa)+'</span><button class="btn btn-secondary btn-sm" data-action="modal" data-modal="prova" data-id="'+x.id+'">'+icon('camera',16)+' Enviar prova</button></div></div>';}).join('') : emptyMini('Nenhuma tarefa pendente. 🎉')) +
     '<div class="divider"></div>' +
@@ -878,10 +925,30 @@ function screenAdultoPerfil(){
       '<button class="icon-btn" style="width:36px;height:36px;color:var(--danger)" data-action="excluir-tutelado" data-id="'+x.id+'" aria-label="Excluir '+esc(x.nome)+'">'+icon('trash',16)+'</button></div>' +
     '</div>';}).join('') +
     '<div class="divider"></div>' +
+    '<button class="btn btn-secondary" data-action="go" data-screen="adulto-personalizar">Gerenciar pedidos e tarefas das crianças</button>' +
     '<button class="btn btn-secondary" data-action="go" data-screen="acessibilidade">'+icon('sparkle',16)+' Acessibilidade e tema</button>' +
     '<button class="btn btn-secondary" style="margin-top:8px" data-action="go" data-screen="adulto-privacidade">Privacidade e consentimento (LGPD)</button>' +
     '<div class="card muted" style="margin-top:10px">Personalização de avatar do responsável — não é foco desta etapa do protótipo.</div>' +
     '<button class="btn btn-danger-outline" style="margin-top:6px" data-action="sair">Sair da conta</button>' +
+  '</div>' + bottomnavAdult('adulto-perfil');
+}
+
+function screenAdultoPersonalizar(){
+  var t=tutelado();
+  var permitidos=(t.pedidosPermitidos||[]).join('\n');
+  return '<div class="topbar"><button class="icon-btn" data-action="go" data-screen="adulto-perfil" aria-label="Voltar">'+icon('chevronLeft',20)+'</button><div class="topbar-title">Pedidos e tarefas</div><span style="width:42px"></span></div>' +
+  '<div class="screen">' +
+    '<div class="card row-between"><div><strong>Personalizar para</strong><p class="muted">Escolha a criança que terá estas regras.</p></div>' +
+      (db.tutelados.length>1?'<select aria-label="Escolher criança" data-action="troca-tutelado">'+db.tutelados.map(function(x){return '<option value="'+x.id+'" '+(x.id===t.id?'selected':'')+'>'+esc(x.nome)+'</option>';}).join('')+'</select>':'<strong>'+esc(t.nome)+'</strong>') + '</div>' +
+    '<div class="card"><h3>O que a criança pode pedir</h3><p class="muted" style="margin:6px 0 10px">Defina se a criança pode escrever qualquer pedido ou se deve escolher somente entre os itens cadastrados.</p>' +
+      '<div class="opt-row"><div class="opt-text"><strong>Permitir pedido livre</strong><span>Quando ativado, a criança pode escrever o que quiser. Quando desativado, só poderá escolher itens desta lista.</span></div><input type="checkbox" id="permitir-pedido-livre" data-action="toggle-pedido-livre" '+(t.permitirPedidoLivre?'checked':'')+' aria-label="Permitir que a criança escreva qualquer pedido"></div>' +
+      '<div class="field"><label for="lista-pedidos">Lista de pedidos permitidos (um por linha)</label><textarea id="lista-pedidos" rows="6" placeholder="Brinquedos&#10;Livros&#10;Bicicleta">'+esc(permitidos)+'</textarea></div>' +
+      '<button class="btn btn-primary" data-action="salvar-pedidos-permitidos">Salvar lista de pedidos</button></div>' +
+    '<div class="card"><h3>Ministrar uma tarefa</h3><p class="muted" style="margin:6px 0 12px">As tarefas são definidas pelo responsável e aparecem automaticamente na área da criança.</p>' +
+      field('nome','Nome da tarefa','text') + field('descricao','Orientações para a criança','textarea') + field('recompensa','Reconhecimento / recompensa (R$)','number') +
+      '<button class="btn btn-primary" data-action="responsavel-criar-tarefa">Atribuir tarefa a '+esc(t.nome)+'</button></div>' +
+    '<h3>Tarefas cadastradas para '+esc(t.nome)+'</h3>' +
+    (t.tarefas.length?t.tarefas.map(function(x){return '<div class="tile tile-neutral"><div class="tile-title">'+esc(x.nome)+'</div><div class="tile-desc">'+esc(x.descricao)+'</div><div class="muted">Recompensa: '+brl(x.recompensa)+' · '+(x.status==='pendente'?'Pendente':x.status==='concluida'?'Concluída':'Não concluída')+'</div></div>';}).join(''):'<div class="card muted">Nenhuma tarefa cadastrada.</div>') +
   '</div>' + bottomnavAdult('adulto-perfil');
 }
 
@@ -925,6 +992,10 @@ var PERGUNTAS = [
   {q:'Como consigo mais moedas?', a:'Concluindo as tarefas combinadas em casa e enviando a foto da tarefa pronta. Cada tarefa tem uma recompensa que entra no seu saldo.'},
   {q:'Quanto falta para a minha meta?', a:null}
 ];
+function respostaAssistenteLivre(texto){
+  return 'O Assistente Pedagógico do Grana Kids está em desenvolvimento. Em breve ele poderá ajudar com dúvidas sobre metas, escolhas e educação financeira. Por enquanto, converse com seu responsável se precisar de ajuda!';
+}
+
 function screenKidsAssistente(){
   var t=tutelado(); var u=ui();
   var historico = state.chat.length ? state.chat.map(function(m){
@@ -934,7 +1005,7 @@ function screenKidsAssistente(){
         (meu? '' : '<div class="muted" style="font-size:11px;margin-bottom:2px">Assistente</div>') +
         esc(m.texto) +
       '</div></div>';
-  }).join('') : '<div class="empty-state"><span class="big-emoji">🦉</span>Toque em uma pergunta abaixo para começar a conversa.</div>';
+  }).join('') : '<div class="empty-state"><span class="big-emoji">🦉</span>Em breve você poderá conversar com a corujinha sobre educação financeira.</div>';
 
   return '' +
   '<div class="topbar">' +
@@ -942,7 +1013,7 @@ function screenKidsAssistente(){
     '<div class="topbar-title">'+(u.emojiTitulo? 'Coruja do dinheiro 🦉' : 'Assistente')+'</div><span style="width:42px"></span>' +
   '</div>' +
   '<div class="screen">' +
-    '<div class="card card-tight muted" style="font-size:12.5px">Esta conversa usa respostas revisadas por adultos. O assistente não fala sobre compras fora do app, não pede dados pessoais e não aprova pedidos.</div>' +
+    '<div class="card card-tight muted" style="font-size:12.5px">O Assistente Pedagógico está em desenvolvimento. Esta área é apenas uma prévia e ainda não oferece respostas inteligentes.</div>' +
     '<div style="margin:14px 0">' + historico + '</div>' +
     '<h3>Perguntas que eu sei responder</h3>' +
     PERGUNTAS.map(function(pp,i){
@@ -951,8 +1022,9 @@ function screenKidsAssistente(){
     (state.chat.length ? '<button class="btn btn-ghost" data-action="chat-limpar">Limpar conversa</button>' : '') +
     '<div class="field" style="margin-top:14px">' +
       '<label for="chat-livre">Escrever uma pergunta</label>' +
-      '<input id="chat-livre" type="text" placeholder="Disponível na versão final" disabled>' +
-      '<div class="hint">No app final, um modelo de linguagem supervisionado responde aqui, com filtros de segurança e linguagem adequada à idade.</div>' +
+      '<textarea id="chat-livre" rows="3" maxlength="280" placeholder="Digite sua pergunta ou ideia..." aria-describedby="chat-ajuda"></textarea>' +
+      '<div class="hint" id="chat-ajuda">Você pode escrever uma pergunta, mas o assistente ainda está em desenvolvimento e responderá com uma mensagem informativa.</div>' +
+      '<button class="btn btn-primary" style="margin-top:10px" data-action="chat-enviar">Enviar pergunta</button>' +
     '</div>' +
   '</div>' + bottomnavKids('kids-inicio');
 }
@@ -989,7 +1061,7 @@ function calcularNudge(valor){
 function screenAcessibilidade(){
   var voltar = state.areaAtual==='adulto' ? 'adulto-perfil' : (state.areaAtual==='kids' ? 'kids-perfil' : 'login');
   var isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  var isCb = state.daltonico;
+  var daltonismo = state.daltonismo;
   var nav = state.areaAtual==='adulto' ? bottomnavAdult('adulto-perfil') : (state.areaAtual==='kids' ? bottomnavKids('kids-perfil') : '');
   return '' +
   '<div class="topbar">' +
@@ -1024,9 +1096,12 @@ function screenAcessibilidade(){
     '</div>' +
     '<div class="card">' +
       '<h3 style="margin-bottom:10px">Daltonismo</h3>' +
-      '<div class="opt-row">' +
-        '<div class="opt-text"><strong>Paleta para daltonismo</strong><span>Troca verde e vermelho por azul, laranja e roxo — cores distinguíveis na deuteranopia e na protanopia.</span></div>' +
-        '<button class="switch" role="switch" aria-checked="'+isCb+'" data-action="toggle-daltonico" aria-label="Ativar paleta para daltonismo"><span class="knob"></span></button>' +
+      '<p class="muted" style="margin-bottom:10px">Escolha a adaptação que corresponde à sua necessidade. As três opções permanecem disponíveis.</p>' +
+      '<div class="seg" role="group" aria-label="Tipo de daltonismo">' +
+        '<button data-action="set-daltonismo" data-tipo="nenhum" aria-pressed="'+(daltonismo==='nenhum')+'">Padrão</button>' +
+        '<button data-action="set-daltonismo" data-tipo="protanopia" aria-pressed="'+(daltonismo==='protanopia')+'">Protanopia</button>' +
+        '<button data-action="set-daltonismo" data-tipo="deuteranopia" aria-pressed="'+(daltonismo==='deuteranopia')+'">Deuteranopia</button>' +
+        '<button data-action="set-daltonismo" data-tipo="tritanopia" aria-pressed="'+(daltonismo==='tritanopia')+'">Tritanopia</button>' +
       '</div>' +
       '<p class="muted" style="margin-top:10px">Mesmo com a paleta normal, nenhum estado do app depende só da cor: todo cartão traz também um texto de status (Pendente, Concluída, Recusada) e um ícone.</p>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
@@ -1064,11 +1139,6 @@ function modalHtml(kind, ctx){
                  : field('valor','Valor (R$)','number',undefined,{max:limite.toFixed(2), hint:'Máximo permitido agora: '+brl(limite)}) ) +
       '<button class="btn btn-primary" data-action="confirmar-meta-valor" data-id="'+g.id+'" data-op="'+ctx.op+'">Confirmar</button>');
   }
-  if(kind==='nova-tarefa'){
-    return sheetWrap('Nova tarefa', '' +
-      field('nome','Nome da tarefa','text') + field('descricao','Descrição','textarea') + field('recompensa','Recompensa (R$)','number') +
-      '<button class="btn btn-primary" data-action="salvar-tarefa">Criar tarefa</button>');
-  }
   if(kind==='prova'){
     if(!db.consentimentos.triagemImagem){
       return sheetWrap('Envio de foto desativado', '' +
@@ -1086,8 +1156,18 @@ function modalHtml(kind, ctx){
       '<button class="btn btn-primary" style="margin-top:14px" data-action="enviar-prova-real" data-id="'+ctx.id+'">Analisar Foto com Visão Computacional</button>');
   }
   if(kind==='nova-solicitacao'){
+    var permitidos=t.pedidosPermitidos||[];
+    if(t.permitirPedidoLivre){
+      var opcoesHtml=permitidos.length?'<datalist id="sugestoes-pedidos">'+permitidos.map(function(x){return '<option value="'+esc(x)+'"></option>';}).join('')+'</datalist>':'';
+      return sheetWrap('Nova solicitação', '' +
+        '<div class="field"><label for="mf-nome">O que você gostaria de pedir?</label><input id="mf-nome" type="text" list="sugestoes-pedidos" placeholder="Escreva seu pedido" autocomplete="off">'+opcoesHtml+'</div>' + field('descricao','Conte um pouco mais (opcional)','textarea') + field('valor','Valor estimado (R$)','number') +
+        '<p class="hint" style="margin-bottom:12px">Você pode escrever qualquer pedido. As sugestões cadastradas pelo responsável também aparecem enquanto você digita.</p>' +
+        '<button class="btn btn-primary" data-action="salvar-solicitacao">Enviar ao responsável</button>');
+    }
+    if(!permitidos.length) return sheetWrap('Pedidos combinados', '<p class="muted" style="margin-bottom:14px">Seu responsável ainda não cadastrou opções de pedidos. Peça a ele para adicionar itens à lista ou permitir pedidos livres.</p><button class="btn btn-primary" data-action="close-modal">Entendi</button>');
     return sheetWrap('Nova solicitação', '' +
-      field('nome','O que você quer pedir?','text') + field('descricao','Descrição','textarea') + field('valor','Valor (R$)','number') +
+      '<div class="field"><label for="mf-nome">Escolha o que deseja pedir</label><select id="mf-nome">'+permitidos.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>';}).join('')+'</select></div>' + field('descricao','Conte um pouco mais (opcional)','textarea') + field('valor','Valor estimado (R$)','number') +
+      '<p class="hint" style="margin-bottom:12px">Você pode pedir somente uma das opções cadastradas pelo seu responsável.</p>' +
       '<button class="btn btn-primary" data-action="salvar-solicitacao">Enviar ao responsável</button>');
   }
   if(kind==='nudge'){
@@ -1160,7 +1240,7 @@ function aplicarPreferencias(){
   var root = document.documentElement;
   var escuro = state.tema==='dark' || (state.tema==='auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   root.setAttribute('data-theme', escuro ? 'dark' : 'light');
-  root.setAttribute('data-cb', state.daltonico ? 'on' : 'off');
+  root.setAttribute('data-cb', state.daltonismo);
   root.style.setProperty('--ui', String(state.escala));
 }
 function render(){
@@ -1174,6 +1254,8 @@ function render(){
   switch(state.screen){
     case 'login': html=screenLogin(); break;
     case 'cadastro': html=screenCadastro(); break;
+    case 'recuperar-senha': html=screenRecuperarSenha(); break;
+    case 'vincular-crianca': html=screenVincularCrianca(); break;
     case 'err404': html=screen404(); break;
     case 'kids-inicio': html=screenKidsInicio(); break;
     case 'kids-metas': html=screenKidsMetas(); break;
@@ -1184,6 +1266,7 @@ function render(){
     case 'adulto-solicitacoes': html=screenAdultoSolicitacoes(); break;
     case 'adulto-relatorio': html=screenAdultoRelatorio(); break;
     case 'adulto-perfil': html=screenAdultoPerfil(); break;
+    case 'adulto-personalizar': html=screenAdultoPersonalizar(); break;
     case 'acessibilidade': html=screenAcessibilidade(); break;
     case 'kids-assistente': html=screenKidsAssistente(); break;
     case 'adulto-privacidade': html=screenPrivacidade(); break;
@@ -1217,7 +1300,7 @@ document.addEventListener('click', function(e){
   if(action==='go'){ go(target.getAttribute('data-screen')); return; }
   if(action==='toggle-notif'){ state.notifOpen=!state.notifOpen; render(); return; }
   if(action==='toggle-senha'){ state.senhaVisivel=!state.senhaVisivel; render(); return; }
-  if(action==='esqueci-senha'){ toast('Em breve: recuperação de senha por e-mail.'); return; }
+  if(action==='esqueci-senha'){ go('recuperar-senha'); return; }
   if(action==='demo-login'){
     var area = target.getAttribute('data-area');
     state.areaAtual = area;
@@ -1244,9 +1327,9 @@ document.addEventListener('click', function(e){
     render();
     toast('Tamanho da interface: '+Math.round(state.escala*100)+'%.'); return;
   }
-  if(action==='toggle-daltonico'){
-    state.daltonico = !state.daltonico;
-    render(); toast(state.daltonico ? 'Paleta para daltonismo ativada.' : 'Paleta de cores padrão restaurada.'); return;
+  if(action==='set-daltonismo'){
+    state.daltonismo = target.getAttribute('data-tipo') || 'nenhum';
+    render(); toast(state.daltonismo==='nenhum' ? 'Paleta padrão ativada.' : 'Adaptação para '+state.daltonismo+' ativada.'); return;
   }
   if(action==='sair'){
     state.areaAtual=null; state.modal=null; state.notifOpen=false; state.tuteladoId=db.tutelados[0].id;
@@ -1275,7 +1358,7 @@ document.addEventListener('click', function(e){
       return;
     }
     state.modal = null; render();
-    toast('🤖 Processando imagem localmente via TensorFlow Lite / MobileNet...');
+    toast('🤖 Demonstração: simulando a análise da imagem no aparelho...');
     
     setTimeout(function(){
       var tk = tutelado(); 
@@ -1315,16 +1398,28 @@ document.addEventListener('click', function(e){
     }
     state.modal=null; render(); return;
   }
-  if(action==='salvar-tarefa'){
-    var n=val('mf-nome'), d=val('mf-descricao'), r=parseFloat(val('mf-recompensa'));
-    if(!n){ toast('Dê um nome para a tarefa.'); return; }
-    if(!(r>0)){ toast('A recompensa precisa ser maior que zero.'); return; }
-    tutelado().tarefas.push({id:'k'+Date.now(), nome:n, descricao:d||'Sem descrição.', recompensa:r, status:'pendente', prazo:'Hoje'});
-    state.modal=null; toast('Tarefa criada!'); render(); return;
+  if(action==='toggle-pedido-livre'){
+    tutelado().permitirPedidoLivre=!!target.checked;
+    toast(tutelado().permitirPedidoLivre?'Pedidos livres ativados.':'Somente pedidos cadastrados.'); return;
+  }
+  if(action==='salvar-pedidos-permitidos'){
+    var area=document.getElementById('lista-pedidos');
+    var lista=(area?area.value:'').split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean);
+    var unicos=[]; lista.forEach(function(x){if(!unicos.some(function(y){return y.toLocaleLowerCase('pt-BR')===x.toLocaleLowerCase('pt-BR');})) unicos.push(x);});
+    tutelado().pedidosPermitidos=unicos; toast('Lista de pedidos permitidos atualizada.'); render(); return;
+  }
+  if(action==='responsavel-criar-tarefa'){
+    var nt=val('mf-nome'), dt=val('mf-descricao'), rt=parseFloat(val('mf-recompensa'));
+    if(!nt){toast('Informe o nome da tarefa.');return;} if(!(rt>0)){toast('Informe uma recompensa maior que zero.');return;}
+    tutelado().tarefas.unshift({id:'k'+Date.now(),nome:nt,descricao:dt||'Tarefa combinada com o responsável.',recompensa:rt,status:'pendente',prazo:'Hoje',criadaPor:'responsavel'});
+    toast('Tarefa atribuída a '+tutelado().nome+'.'); render(); return;
   }
   if(action==='salvar-solicitacao'){
     var n2=val('mf-nome'), d2=val('mf-descricao'), v2=parseFloat(val('mf-valor'));
-    if(!n2){ toast('Conte o que você quer pedir.'); return; }
+    if(!n2){ toast('Escolha uma opção da lista combinada com seu responsável.'); return; }
+    var atual=tutelado();
+    var opcoes=atual.pedidosPermitidos||[];
+    if(!atual.permitirPedidoLivre && !opcoes.some(function(x){return x.toLocaleLowerCase('pt-BR')===n2.toLocaleLowerCase('pt-BR');})){toast('Esse pedido não está na lista combinada com seu responsável.');return;}
     if(!(v2>0)){ toast('O valor precisa ser maior que zero.'); return; }
     state.pendenteSolic = {nome:n2, descricao:d2||'Sem descrição.', valor:v2};
     state.modal = {kind:'nudge', ctx:{}};
@@ -1333,17 +1428,16 @@ document.addEventListener('click', function(e){
   if(action==='chat-perguntar'){
     var idx = parseInt(target.getAttribute('data-idx'),10);
     var pp = PERGUNTAS[idx]; if(!pp) return;
-    var resposta = pp.a;
-    if(resposta===null){
-      var tk3=tutelado();
-      var aberta = tk3.metas.filter(function(g){return !g.concluida;})
-                            .sort(function(a,b){ return (b.dep/b.total)-(a.dep/a.total); })[0];
-      resposta = aberta
-        ? 'Para a meta "'+aberta.nome+'" faltam '+brl(aberta.total-aberta.dep)+'. Você já guardou '+brl(aberta.dep)+' — está em '+pct(aberta.dep,aberta.total)+'% do caminho!'
-        : 'Você ainda não tem uma meta em andamento. Crie uma na aba de metas e eu acompanho o seu progresso!';
-    }
+    var resposta = respostaAssistenteLivre(pp.q);
     state.chat.push({de:'crianca', texto:pp.q});
     state.chat.push({de:'bot', texto:resposta});
+    render(); return;
+  }
+  if(action==='chat-enviar'){
+    var pergunta=val('chat-livre');
+    if(!pergunta){ toast('Escreva sua pergunta antes de enviar.'); return; }
+    state.chat.push({de:'crianca',texto:pergunta});
+    state.chat.push({de:'bot',texto:respostaAssistenteLivre(pergunta)});
     render(); return;
   }
   if(action==='chat-limpar'){ state.chat=[]; render(); return; }
@@ -1380,7 +1474,7 @@ document.addEventListener('click', function(e){
     if(!n3){ toast('Informe o nome do tutelado.'); return; }
     if(!(i3>=5 && i3<=11)){ toast('A idade precisa estar entre 5 e 11 anos.'); return; }
     var emojis=['🐨','🦁','🐸','🦄','🐯','🐵','🐶'];
-    var novo={id:'t'+Date.now(), nome:n3, idade:i3, emoji:emojis[db.tutelados.length%emojis.length], corAvatar:'#E3F3EC', saldo:0, roupa:'👒', metas:[], tarefas:[], solicitacoes:[]};
+    var novo={id:'t'+Date.now(), nome:n3, idade:i3, emoji:emojis[db.tutelados.length%emojis.length], corAvatar:'#E3F3EC', saldo:0, roupa:'👒', pedidosPermitidos:[], metas:[], tarefas:[], solicitacoes:[]};
     db.tutelados.push(novo);
     state.tuteladoId = novo.id;
     state.modal=null; toast(n3+' foi adicionado(a)!'); render(); return;
@@ -1389,7 +1483,7 @@ document.addEventListener('click', function(e){
     var id4=target.getAttribute('data-id'); var x=db.tutelados.find(function(u){return u.id===id4;});
     var novaIdade=parseInt(val('mf-idade'),10);
     if(val('mf-idade') && !(novaIdade>=5 && novaIdade<=11)){ toast('A idade precisa estar entre 5 e 11 anos.'); return; }
-    x.nome=val('mf-nome')||x.nome; if(novaIdade>=5 && novaIdade<=11){ x.idade=novaIdres; x.idade=novaIdade; }
+    x.nome=val('mf-nome')||x.nome; if(novaIdade>=5 && novaIdade<=11){ x.idade=novaIdade; }
     state.modal=null; toast('Dados atualizados!'); render(); return;
   }
   if(action==='excluir-tutelado'){
@@ -1408,8 +1502,27 @@ document.addEventListener('submit', function(e){
   var form = e.target.closest('[data-form]'); if(!form) return;
   e.preventDefault();
   var kind = form.getAttribute('data-form');
-  if(kind==='login'){ state.areaAtual='kids'; go('kids-inicio'); toast('Login simulado — entrando na área da criança.'); }
-  if(kind==='cadastro'){ toast('Conta criada com sucesso (simulação).'); go('login'); }
+  if(kind==='login'){
+    var apelido=val('f-apelido'), senha=val('f-senha');
+    if(!apelido || !senha){ toast('Informe seu apelido e sua senha.'); return; }
+    state.areaAtual='kids'; go('kids-inicio'); toast('Acesso demonstrativo — entrando na área da criança.');
+  }
+  if(kind==='cadastro'){
+    var s1=val('c-senha'), s2=val('c-senha2');
+    if(s1.length<8){ toast('Use uma senha demonstrativa com pelo menos 8 caracteres.'); return; }
+    if(s1!==s2){ toast('As senhas não conferem.'); return; }
+    toast('Cadastro demonstrativo validado. Nenhuma conta real foi criada.'); go('login');
+  }
+  if(kind==='recuperar'){
+    var email=val('r-email');
+    if(!email){ toast('Informe o e-mail cadastrado.'); return; }
+    toast('Fluxo demonstrativo: o envio de e-mail depende da integração de autenticação.'); go('login');
+  }
+  if(kind==='vincular'){
+    var codigo=val('v-codigo');
+    if(!codigo){ toast('Informe o código de convite.'); return; }
+    toast('Código recebido na demonstração. A confirmação real exige validação pelo responsável e pelo servidor.'); go('cadastro');
+  }
 });
 function val(id){ var el=document.getElementById(id); return el? el.value.trim() : ''; }
 function setReqStatus(id, status){
