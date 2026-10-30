@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
 <style>
 /* ============ TOKENS ============ */
-/* Tema CLARO (padrão) */
 :root{
   --page:#EDEAE0;
   --bg:#FFF6E9; --bg-adult:#F2F6F4; --surface:#FFFFFF;
@@ -22,13 +21,13 @@
   --danger:#A5352B; --danger-bg:#FBE6E3;
   --saldo-grad:linear-gradient(135deg, #1B7A62 0%, #124F40 100%);
   --nav-active-bg:#E3F3EC; --nav-active-ink:#124F40; --focus:#124F40;
-  --ui:1; /* escala da interface (acessibilidade visual) */
+  --ui:1;
   --r-sm:10px; --r-md:16px; --r-lg:22px; --r-pill:999px;
   --shadow:0 1px 2px rgba(22,35,31,.06), 0 6px 16px rgba(22,35,31,.07);
   --font-display:'Baloo 2', ui-rounded, 'Segoe UI Rounded', system-ui, sans-serif;
   --font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
-/* Tema ESCURO — contrastes recalculados (todos >= 4,5:1) */
+/* Tema ESCURO refinado (alto contraste) */
 html[data-theme="dark"] {
   --page: #121214;
   --bg: #1A1D20; 
@@ -61,7 +60,7 @@ html[data-theme="dark"] {
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 html[data-theme="dark"] .app-shell.theme-adult{ --surface:#1B2422; --ink:#EDF3F0; --ink-soft:#AEBDB7; }
-/* Modo DALTÔNICO — status deixam de usar verde/vermelho e passam a azul/laranja/roxo */
+
 html[data-cb="on"]{
   --success:#00507D; --success-ink:#00507D; --success-bg:#DCEBF5;
   --pending:#8A5300; --pending-bg:#FCEBD0;
@@ -90,9 +89,6 @@ img,svg{display:block;}
 /* ============ STAGE / APP SHELL ============ */
 #stage{min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding:0;}
 .app-shell{
-  /* zoom redesenha o texto em vetor (não amplia bitmap), então a leitura
-     fica maior sem perder nitidez; a largura/altura são divididas pela
-     escala para que a moldura do aparelho continue do mesmo tamanho */
   zoom:var(--ui);
   width:calc(100% / var(--ui)); max-width:460px; height:calc(100vh / var(--ui));
   background:var(--bg);
@@ -166,7 +162,23 @@ p{margin:0; line-height:1.45;}
 .stack{display:flex; flex-direction:column; gap:2px; min-width:0;}
 .ellipsis{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-/* saldo hero */
+/* saldo hero lúdico (Prioridade 1) */
+.age-small .saldo-card, .age-mid .saldo-card {
+  background: linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%) !important;
+  border-radius: 24px;
+  box-shadow: 0 10px 20px rgba(255, 126, 95, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.age-small .saldo-card::after, .age-mid .saldo-card::after {
+  content: "⭐";
+  position: absolute;
+  right: -10px;
+  bottom: -15px;
+  font-size: 80px;
+  opacity: 0.25;
+  pointer-events: none;
+}
 .saldo-card{
   background:var(--saldo-grad); color:#fff; border-radius:var(--r-lg);
   padding:20px; box-shadow:var(--shadow); margin-bottom:6px;
@@ -189,7 +201,8 @@ p{margin:0; line-height:1.45;}
 .progress-fill{height:100%; background:linear-gradient(90deg, var(--gold), var(--primary)); border-radius:var(--r-pill);}
 
 /* buttons */
-.btn{border:none; border-radius:var(--r-pill); font-weight:800; font-size:14px; padding:12px 18px; display:inline-flex; align-items:center; justify-content:center; gap:6px; width:100%;}
+.btn{border:none; border-radius:var(--r-pill); font-weight:800; font-size:14px; padding:12px 18px; display:inline-flex; align-items:center; justify-content:center; gap:6px; width:100%; transition:transform .15s ease, box-shadow .15s ease;}
+.btn:active{transform:scale(0.98);}
 .btn-primary{background:var(--primary); color:#fff;}
 .btn-primary:active{background:var(--primary-dark);}
 .theme-adult .btn-primary{background:var(--primary-dark);}
@@ -205,7 +218,8 @@ p{margin:0; line-height:1.45;}
 .fab-row{margin:14px 0;}
 
 /* task/goal/request card variants by status */
-.tile{border-radius:var(--r-md); padding:14px; margin-bottom:10px; box-shadow:var(--shadow);}
+.tile{border-radius:var(--r-md); padding:14px; margin-bottom:10px; box-shadow:var(--shadow); transition:transform .15s ease;}
+.tile:active{transform:scale(0.98);}
 .tile-pending{background:var(--pending-bg);}
 .tile-success{background:var(--success-bg);}
 .tile-danger{background:var(--danger-bg);}
@@ -287,13 +301,17 @@ p{margin:0; line-height:1.45;}
 .ui-xl .topbar-title{ font-size:16px; }
 .ui-xl.age-small .screen, .ui-xl .screen{ font-size:15px; }
 
-/* mascote (apenas 5–7 anos) */
+/* mascote lúdico animado (Prioridade 1) */
 .mascote{ display:flex; align-items:center; justify-content:flex-end; gap:8px; margin:2px 0 10px; }
 .mascote-bolha{
   background:var(--surface); border-radius:var(--r-pill); padding:9px 14px; font-size:14px; font-weight:700;
-  box-shadow:var(--shadow); color:var(--ink);
+  box-shadow:var(--shadow); color:var(--ink); border: 2px solid var(--gold);
 }
-.mascote-emoji{ font-size:34px; line-height:1; }
+.mascote-emoji{ font-size:40px; line-height:1; animation: bounce 2s infinite ease-in-out; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 
 /* linha de opção (configurações) */
 .opt-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
@@ -349,10 +367,8 @@ p{margin:0; line-height:1.45;}
 <script>
 /* =====================================================================
    GRANA KIDS — PROTÓTIPO DE FRONT-END (mock, sem back-end real)
-   Todos os dados abaixo são fictícios e vivem apenas em memória (JS).
    ===================================================================== */
 
-/* ---------- ícones (SVG simples, originais, stroke=currentColor) ---------- */
 function icon(name, size){
   size = size || 22;
   var s = 'width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
@@ -381,7 +397,6 @@ function icon(name, size){
   return paths[name] || '';
 }
 
-/* ---------- dados mock (memória apenas, sem persistência real) ---------- */
 var db = {
   responsavel:{ nome:'Claudia Manoela', apelido:'claudia.m', emoji:'👩🏽' },
   tutelados:[
@@ -420,7 +435,7 @@ var db = {
     }
   ],
   consentimentos:{
-    triagemImagem:true,   /* Art. 14 LGPD — consentimento parental específico e destacado */
+    triagemImagem:true,
     assistente:true,
     relatorios:true
   },
@@ -431,15 +446,14 @@ var db = {
   ]
 };
 
-/* ---------- estado da aplicação (somente navegação/UI, não é back-end) ---------- */
 var state = {
   screen:'login', tuteladoId:'t1', notifOpen:false, expandedGoal:null, senhaVisivel:false, modal:null,
-  tema:'auto',        /* 'light' | 'dark' | 'auto' (acompanha o aparelho) */
-  daltonico:false,    /* paleta segura para daltonismo */
-  escala:1,           /* escala da interface: 1 | 1.15 | 1.3 | 1.5 */
-  pendenteSolic:null, /* solicitação aguardando o alerta reflexivo (nudge) */
-  chat:[],            /* histórico do assistente pedagógico */
-  areaAtual:null      /* 'kids' | 'adulto' — define para onde o app volta ao sair de Acessibilidade */
+  tema:'auto',
+  daltonico:false,
+  escala:1,
+  pendenteSolic:null,
+  chat:[],
+  areaAtual:null
 };
 
 function tutelado(){ return db.tutelados.find(function(t){return t.id===state.tuteladoId;}) || db.tutelados[0]; }
@@ -448,12 +462,8 @@ function pct(dep,total){ return Math.max(0, Math.min(100, Math.round((dep/total)
 function unreadCount(){ return db.notificacoes.filter(function(n){return !n.lida;}).length; }
 function esc(str){ return String(str).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
-/* ---------- ADAPTAÇÃO POR FAIXA ETÁRIA ----------
-   Quanto menor a criança, mais elementos lúdicos (mascote, emojis, celebração,
-   linguagem afetiva e tipografia maior). Conforme a idade avança, a interface
-   vai ficando mais próxima da linguagem financeira real usada na área adulta. */
 var FAIXAS = {
-  pequeno:{ /* 5 a 7 anos */
+  pequeno:{
     classe:'age-small', rotulo:'5 a 7 anos — máximo lúdico',
     mascote:'🐷', saudacao:function(n){ return 'Oi, '+n+'!'; },
     labelSaldo:'Meu cofrinho', labelMetas:'Meus sonhos', labelTarefas:'Minhas missões',
@@ -464,7 +474,7 @@ var FAIXAS = {
     metaResumo:function(g){ return g.concluida ? 'Você conseguiu! 🎉' : 'Faltam '+brl(g.total-g.dep)+' para conseguir!'; },
     dicaSaldo:'É o dinheiro que você pode usar agora.'
   },
-  medio:{ /* 8 a 9 anos */
+  medio:{
     classe:'age-mid', rotulo:'8 a 9 anos — lúdico moderado',
     mascote:null, saudacao:function(n){ return 'Olá, '+n+'!'; },
     labelSaldo:'Meu saldo', labelMetas:'Metas', labelTarefas:'Tarefas',
@@ -475,7 +485,7 @@ var FAIXAS = {
     metaResumo:function(g){ return g.concluida ? 'Meta alcançada! 🎉' : brl(g.dep)+' de '+brl(g.total)+' — faltam '+brl(g.total-g.dep); },
     dicaSaldo:'Saldo livre para usar ou guardar em uma meta.'
   },
-  maior:{ /* 10 a 11 anos */
+  maior:{
     classe:'age-big', rotulo:'10 a 11 anos — próximo da linguagem real',
     mascote:null, saudacao:function(n){ return 'Olá, '+n; },
     labelSaldo:'Saldo disponível', labelMetas:'Metas', labelTarefas:'Tarefas',
@@ -501,10 +511,6 @@ function toast(msg){
   host.appendChild(el);
   setTimeout(function(){ el.remove(); }, 2600);
 }
-
-/* =====================================================================
-   RENDER — cada tela é uma função que retorna uma string HTML
-   ===================================================================== */
 
 function topbarKids(title){
   var t = tutelado();
@@ -558,7 +564,6 @@ function bottomnavAdult(active){
   }).join('') + '</nav>';
 }
 
-/* ---------------- LOGIN / CADASTRO / 404 ---------------- */
 function screenLogin(){
   return '<div class="screen no-nav-pad auth-wrap">' +
     '<div class="row-between" style="padding-top:14px">' +
@@ -614,7 +619,6 @@ function screen404(){
   '</div>';
 }
 
-/* ---------------- ÁREA KIDS ---------------- */
 function goalMiniCard(g){
   var u = ui();
   return '<div class="card card-tight">' +
@@ -656,8 +660,6 @@ function screenKidsInicio(){
   '</div>' + bottomnavKids('kids-inicio');
 }
 function marcaOk(){
-  /* marca de "concluído" desenhada com a cor do próprio status, para continuar
-     legível no tema escuro e na paleta para daltonismo (um emoji seria sempre verde) */
   return '<span style="display:inline-flex;vertical-align:-3px;margin-left:6px;color:var(--success-ink)">'+icon('check',16)+'</span>';
 }
 function emptyMini(msg){ return '<div class="card card-tight muted" style="text-align:center">'+esc(msg)+'</div>'; }
@@ -726,7 +728,7 @@ function screenKidsSolicitacoes(){
       return '<div class="card"><div class="row-between"><strong>'+esc(s.nome)+'</strong><span class="pill '+map.pill+'">'+map.label+'</span></div>' +
         '<p class="muted" style="margin:6px 0">'+esc(s.descricao)+'</p>' +
         '<strong>'+brl(s.valor)+'</strong></div>';
-    }).join('') : emptyMini('Nenhuma solicitação ainda. Toque em "Nova solicitação" para pedir algo ao seu responsável.')) +
+    }).join('') : emptyMini('Nenhuma solicitação ainda. Toque em "Nova solicitação" para pedir ao seu responsável.')) +
   '</div>' + bottomnavKids('kids-solicitacoes');
 }
 
@@ -760,7 +762,6 @@ function screenKidsAvatar(){
   '</div>' + bottomnavKids('kids-perfil');
 }
 
-/* ---------------- ÁREA ADULTO ---------------- */
 function tuteladoSwitcher(){
   var t=tutelado();
   return '<div class="card row-between">' +
@@ -870,7 +871,6 @@ function screenAdultoPerfil(){
   '</div>' + bottomnavAdult('adulto-perfil');
 }
 
-/* ---------------- PRIVACIDADE E CONSENTIMENTO (LGPD Art. 14) ---------------- */
 function screenPrivacidade(){
   var c = db.consentimentos;
   function linha(chave, titulo, desc){
@@ -905,7 +905,6 @@ function screenPrivacidade(){
   '</div>' + bottomnavAdult('adulto-perfil');
 }
 
-/* ---------------- ASSISTENTE PEDAGÓGICO (com guardrails) ---------------- */
 var PERGUNTAS = [
   {q:'O que é poupar?', a:'Poupar é guardar um pouquinho do seu dinheiro hoje para conseguir uma coisa maior depois. Cada moeda que você guarda deixa a sua meta mais perto!'},
   {q:'Por que preciso pedir para comprar?', a:'Porque aqui vocês decidem juntos. Você escolhe o que quer e explica o motivo; o seu responsável confere e aprova. Assim você treina a decisão com segurança.'},
@@ -917,521 +916,4 @@ function screenKidsAssistente(){
   var historico = state.chat.length ? state.chat.map(function(m){
     var meu = m.de==='crianca';
     return '<div style="display:flex;justify-content:'+(meu?'flex-end':'flex-start')+';margin-bottom:8px">' +
-      '<div class="card card-tight" style="max-width:82%;margin:0;'+(meu?'background:var(--primary-soft)':'')+'">' +
-        (meu? '' : '<div class="muted" style="font-size:11px;margin-bottom:2px">Assistente</div>') +
-        esc(m.texto) +
-      '</div></div>';
-  }).join('') : '<div class="empty-state"><span class="big-emoji">🦉</span>Toque em uma pergunta abaixo para começar a conversa.</div>';
-
-  return '' +
-  '<div class="topbar">' +
-    '<button class="icon-btn" data-action="go" data-screen="kids-inicio" aria-label="Voltar">'+icon('chevronLeft',20)+'</button>' +
-    '<div class="topbar-title">'+(u.emojiTitulo? 'Coruja do dinheiro 🦉' : 'Assistente')+'</div><span style="width:42px"></span>' +
-  '</div>' +
-  '<div class="screen">' +
-    '<div class="card card-tight muted" style="font-size:12.5px">Esta conversa usa respostas revisadas por adultos. O assistente não fala sobre compras fora do app, não pede dados pessoais e não aprova pedidos.</div>' +
-    '<div style="margin:14px 0">' + historico + '</div>' +
-    '<h3>Perguntas que eu sei responder</h3>' +
-    PERGUNTAS.map(function(pp,i){
-      return '<button class="btn btn-secondary" style="margin-bottom:8px;text-align:left;justify-content:flex-start" data-action="chat-perguntar" data-idx="'+i+'">'+esc(pp.q)+'</button>';
-    }).join('') +
-    (state.chat.length ? '<button class="btn btn-ghost" data-action="chat-limpar">Limpar conversa</button>' : '') +
-    '<div class="field" style="margin-top:14px">' +
-      '<label for="chat-livre">Escrever uma pergunta</label>' +
-      '<input id="chat-livre" type="text" placeholder="Disponível na versão final" disabled>' +
-      '<div class="hint">No app final, um modelo de linguagem supervisionado responde aqui, com filtros de segurança e linguagem adequada à idade.</div>' +
-    '</div>' +
-  '</div>' + bottomnavKids('kids-inicio');
-}
-
-/* ---------------- ACESSIBILIDADE E TEMA (compartilhada) ---------------- */
-var ESCALAS = [
-  {v:1,    nome:'Padrão', dica:'tamanho original das telas.'},
-  {v:1.15, nome:'Grande', dica:'bom para quem força a vista para ler valores.'},
-  {v:1.3,  nome:'Maior',  dica:'letras e botões bem destacados.'},
-  {v:1.5,  nome:'Máximo', dica:'baixa visão — mostra menos conteúdo por tela.'}
-];
-function escalaAtual(){
-  for(var i=0;i<ESCALAS.length;i++){ if(Math.abs(ESCALAS[i].v-state.escala)<0.001) return ESCALAS[i]; }
-  return ESCALAS[0];
-}
-/* ---------- MOTOR DE INTERVENÇÃO PEDAGÓGICA (NUDGE) ----------
-   Traduz um gasto pretendido em impacto concreto sobre a meta mais próxima da
-   criança, para que a decisão seja tomada com consciência da consequência.
-   A decisão final continua sendo da criança (enviar) e do responsável (aprovar). */
-function calcularNudge(valor){
-  var t = tutelado();
-  var abertas = t.metas.filter(function(g){ return !g.concluida; })
-                       .sort(function(a,b){ return (b.dep/b.total)-(a.dep/a.total); });
-  var meta = abertas[0] || null;
-  /* ganho semanal estimado pelo que a criança costuma receber em tarefas */
-  var ganhoSemanal = t.tarefas.reduce(function(acc,x){ return acc + x.recompensa; }, 0);
-  if(ganhoSemanal<=0){ ganhoSemanal = 5; }
-  var semanas = Math.max(1, Math.ceil(valor / ganhoSemanal));
-  var restante = meta ? Math.max(0, meta.total - meta.dep) : 0;
-  return {
-    meta: meta,
-    semanas: semanas,
-    restante: restante,
-    sobra: Math.max(0, t.saldo - valor),
-    comprometeSaldo: valor > t.saldo
-  };
-}
-
-function screenAcessibilidade(){
-  var voltar = state.areaAtual==='adulto' ? 'adulto-perfil' : (state.areaAtual==='kids' ? 'kids-perfil' : 'login');
-  var isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  var isCb = state.daltonico;
-  var nav = state.areaAtual==='adulto' ? bottomnavAdult('adulto-perfil') : (state.areaAtual==='kids' ? bottomnavKids('kids-perfil') : '');
-  return '' +
-  '<div class="topbar">' +
-    '<button class="icon-btn" data-action="go" data-screen="'+voltar+'" aria-label="Voltar">'+icon('chevronLeft',20)+'</button>' +
-    '<div class="topbar-title">Acessibilidade</div><span style="width:42px"></span>' +
-  '</div>' +
-  '<div class="screen'+(nav? '' : ' no-nav-pad')+'">' +
-    '<div class="card">' +
-      '<h3 style="margin-bottom:10px">Aparência</h3>' +
-      '<div class="opt-row">' +
-        '<div class="opt-text"><strong>Tema escuro</strong><span>Fundo escuro, mais confortável à noite e para quem tem sensibilidade à luz.</span></div>' +
-        '<button class="switch" role="switch" aria-checked="'+isDark+'" data-action="toggle-tema" aria-label="Ativar tema escuro"><span class="knob"></span></button>' +
-      '</div>' +
-      '<div class="opt-row" style="display:block">' +
-        '<div class="opt-text" style="margin-bottom:8px"><strong>Escolha rápida</strong><span>O tema também acompanha a preferência do seu aparelho.</span></div>' +
-        '<div class="seg" role="group" aria-label="Escolher tema">' +
-          '<button data-action="set-tema" data-tema="light" aria-pressed="'+(state.tema==='light')+'">Claro</button>' +
-          '<button data-action="set-tema" data-tema="dark" aria-pressed="'+(state.tema==='dark')+'">Escuro</button>' +
-          '<button data-action="set-tema" data-tema="auto" aria-pressed="'+(state.tema==='auto')+'">Automático</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="card">' +
-      '<h3 style="margin-bottom:6px">Escala da interface</h3>' +
-      '<p class="muted" style="margin-bottom:10px">Aumenta letras, botões e caixas de uma vez só. O texto é redesenhado em vetor, então continua nítido em qualquer tamanho.</p>' +
-      '<div class="seg" role="group" aria-label="Escolher tamanho da interface">' +
-        ESCALAS.map(function(op){
-          return '<button data-action="set-escala" data-escala="'+op.v+'" aria-pressed="'+(Math.abs(state.escala-op.v)<0.001)+'">'+op.nome+'</button>';
-        }).join('') +
-      '</div>' +
-      '<p class="muted" style="margin-top:10px">Em uso: <strong>'+Math.round(state.escala*100)+'%</strong> — '+esc(escalaAtual().dica)+'</p>' +
-    '</div>' +
-    '<div class="card">' +
-      '<h3 style="margin-bottom:10px">Daltonismo</h3>' +
-      '<div class="opt-row">' +
-        '<div class="opt-text"><strong>Paleta para daltonismo</strong><span>Troca verde e vermelho por azul, laranja e roxo — cores distinguíveis na deuteranopia e na protanopia.</span></div>' +
-        '<button class="switch" role="switch" aria-checked="'+isCb+'" data-action="toggle-daltonico" aria-label="Ativar paleta para daltonismo"><span class="knob"></span></button>' +
-      '</div>' +
-      '<p class="muted" style="margin-top:10px">Mesmo com a paleta normal, nenhum estado do app depende só da cor: todo cartão traz também um texto de status (Pendente, Concluída, Recusada) e um ícone.</p>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
-        '<span class="pill pill-pending">Pendente</span>' +
-        '<span class="pill pill-success">Concluída</span>' +
-        '<span class="pill pill-danger">Recusada</span>' +
-      '</div>' +
-    '</div>' +
-    (state.areaAtual!=='kids' ? '' :
-      '<div class="card">' +
-        '<h3 style="margin-bottom:6px">Linguagem da interface</h3>' +
-        '<p class="muted">Esta conta tem '+tutelado().idade+' anos, então o app está no modo <strong>'+esc(ui().rotulo)+'</strong>. Quanto menor a criança, mais mascote, emojis e frases de incentivo; conforme cresce, a interface vai usando a linguagem financeira real.</p>' +
-      '</div>') +
-  '</div>' + nav;
-}
-
-/* =====================================================================
-   MODAIS (sheets)
-   ===================================================================== */
-function modalHtml(kind, ctx){
-  var t = tutelado();
-  if(kind==='nova-meta'){
-    return sheetWrap('Nova meta', '' +
-      field('nome','Nome da meta','text') + field('descricao','Descrição','textarea') + field('total','Valor total (R$)','number') +
-      '<button class="btn btn-primary" data-action="salvar-meta">Criar meta</button>');
-  }
-  if(kind==='meta-valor'){
-    var g=t.metas.find(function(x){return x.id===ctx.id;});
-    var isDep = ctx.op==='depositar';
-    var maxDep = Math.min(t.saldo, g.total-g.dep);
-    var limite = isDep ? maxDep : g.dep;
-    return sheetWrap((isDep?'Depositar em ':'Retirar de ')+'"'+esc(g.nome)+'"', '' +
-      '<p class="muted" style="margin-bottom:14px">Guardado nesta meta: '+brl(g.dep)+' de '+brl(g.total)+'<br>Seu saldo livre: '+brl(t.saldo)+'</p>' +
-      (limite<=0 ? '<div class="card card-tight muted" style="text-align:center">'+(isDep? 'Esta meta já está completa ou você não tem saldo livre.' : 'Não há valor guardado para retirar.')+'</div>'
-                 : field('valor','Valor (R$)','number',undefined,{max:limite.toFixed(2), hint:'Máximo permitido agora: '+brl(limite)}) ) +
-      '<button class="btn btn-primary" data-action="confirmar-meta-valor" data-id="'+g.id+'" data-op="'+ctx.op+'">Confirmar</button>');
-  }
-  if(kind==='nova-tarefa'){
-    return sheetWrap('Nova tarefa', '' +
-      field('nome','Nome da tarefa','text') + field('descricao','Descrição','textarea') + field('recompensa','Recompensa (R$)','number') +
-      '<button class="btn btn-primary" data-action="salvar-tarefa">Criar tarefa</button>');
-  }
-  if(kind==='prova'){
-    if(!db.consentimentos.triagemImagem){
-      return sheetWrap('Envio de foto desativado', '' +
-        '<p class="muted" style="margin-bottom:14px">O seu responsável desativou a análise de fotos de tarefas nas configurações de privacidade.</p>' +
-        '<button class="btn btn-primary" data-action="close-modal">Entendi</button>');
-    }
-    return sheetWrap('Enviar prova da tarefa 📸', '' +
-      '<p class="muted" style="margin-bottom:12px">Selecione ou tire uma foto para a IA analisar a tarefa (MobileNet / On-Device):</p>' +
-      '<div class="card card-tight" style="text-align:center;border:2px dashed var(--line);padding:16px;">' +
-        '<input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="previewFoto(event)">' +
-        '<div id="foto-preview-wrap">' +
-          '<button class="btn btn-secondary" onclick="document.getElementById(\'foto-input\').click()" style="width:auto;margin:0 auto">'+icon('camera',20)+' Tirar Foto / Selecionar Imagem</button>' +
-        '</div>' +
-      '</div>' +
-      '<button class="btn btn-primary" style="margin-top:14px" data-action="enviar-prova-real" data-id="'+ctx.id+'">Analisar Foto com Visão Computacional</button>');
-  }
-  function previewFoto(event) {
-  var input = event.target;
-  if (input.files && input.files[0]) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('foto-preview-wrap').innerHTML = 
-        '<img src="' + e.target.result + '" style="max-width:100%;max-height:180px;border-radius:12px;margin-bottom:8px;" />' +
-        '<br><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'foto-input\').click()">Trocar foto</button>';
-    }
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-// Dentro do listener de clique (document.addEventListener('click', ...))
-if(action==='enviar-prova-real'){
-  var id = target.getAttribute('data-id');
-  var fileInput = document.getElementById('foto-input');
-  if(!fileInput || !fileInput.files || fileInput.files.length === 0){
-    toast('⚠️ Por favor, tire ou escolha uma foto antes de enviar!');
-    return;
-  }
-  state.modal = null; render();
-  toast('🤖 Processando imagem localmente via TensorFlow Lite / MobileNet...');
-  
-  setTimeout(function(){
-    var tk = tutelado(); 
-    var task = tk.tarefas.find(function(x){return x.id===id;});
-    if(task){ 
-      task.status = 'concluida'; 
-      tk.saldo += task.recompensa; 
-      toast('✅ Visão Computacional: Tarefa validada com sucesso! +'+brl(task.recompensa)); 
-      render(); 
-    }
-  }, 1600);
-  return;
-}
-    }
-  if(kind==='nova-solicitacao'){
-    return sheetWrap('Nova solicitação', '' +
-      field('nome','O que você quer pedir?','text') + field('descricao','Descrição','textarea') + field('valor','Valor (R$)','number') +
-      '<button class="btn btn-primary" data-action="salvar-solicitacao">Enviar ao responsável</button>');
-  }
-  if(kind==='nudge'){
-    var ps = state.pendenteSolic || {nome:'', valor:0};
-    var nd = calcularNudge(ps.valor);
-    var pequeno = ui().classe==='age-small';
-    var corpo = '';
-    if(nd.meta){
-      corpo += '<p style="margin-bottom:12px">' + (pequeno
-        ? 'Se você gastar '+brl(ps.valor)+' agora, o seu sonho <strong>'+esc(nd.meta.nome)+'</strong> pode demorar mais <strong>'+nd.semanas+(nd.semanas>1?' semanas':' semana')+'</strong> para chegar.'
-        : 'Gastar '+brl(ps.valor)+' agora adia em cerca de <strong>'+nd.semanas+(nd.semanas>1?' semanas':' semana')+'</strong> a sua meta <strong>'+esc(nd.meta.nome)+'</strong>, que ainda precisa de '+brl(nd.restante)+'.') + '</p>';
-      corpo += '<div class="card card-tight" style="margin-bottom:12px">' +
-        '<div class="row-between"><strong>'+esc(nd.meta.nome)+'</strong><span class="muted">'+pct(nd.meta.dep,nd.meta.total)+'%</span></div>' +
-        '<div class="progress-track"><div class="progress-fill" style="width:'+pct(nd.meta.dep,nd.meta.total)+'%"></div></div>' +
-        '<div class="muted">'+brl(nd.meta.dep)+' de '+brl(nd.meta.total)+'</div></div>';
-    } else {
-      corpo += '<p style="margin-bottom:12px">Você ainda não tem uma meta em andamento. Que tal criar uma antes de gastar '+brl(ps.valor)+'?</p>';
-    }
-    corpo += '<p class="muted" style="margin-bottom:14px">Depois deste pedido sobrariam '+brl(nd.sobra)+' no seu saldo.' +
-             (nd.comprometeSaldo ? ' <strong>Atenção: o valor é maior que o seu saldo atual.</strong>' : '') + '</p>';
-    return sheetWrap(pequeno? 'Pensa um pouquinho…' : 'Antes de enviar o pedido', '' +
-      corpo +
-      '<div class="btn-row">' +
-        '<button class="btn btn-secondary" data-action="nudge-repensar">'+(pequeno?'Vou pensar':'Pensar melhor')+'</button>' +
-        '<button class="btn btn-primary" data-action="nudge-confirmar">Enviar assim mesmo</button>' +
-      '</div>' +
-      '<p class="muted" style="margin-top:12px;font-size:12px">Este aviso é só para ajudar você a decidir. Quem aprova o pedido continua sendo o seu responsável.</p>');
-  }
-  if(kind==='add-saldo'){
-    return sheetWrap('Adicionar saldo para '+esc(t.nome), '' +
-      field('valor','Valor (R$)','number') +
-      '<button class="btn btn-primary" data-action="confirmar-add-saldo">Adicionar</button>');
-  }
-  if(kind==='add-tutelado'){
-    return sheetWrap('Adicionar tutelado', '' +
-      field('nome','Nome','text') + field('idade','Idade','number',undefined,{min:'5',max:'11',step:'1',hint:'O Grana Kids atende crianças de 5 a 11 anos.'}) +
-      '<button class="btn btn-primary" data-action="confirmar-add-tutelado">Adicionar</button>');
-  }
-  if(kind==='editar-tutelado'){
-    var x=db.tutelados.find(function(u){return u.id===ctx.id;});
-    return sheetWrap('Editar '+esc(x.nome), '' +
-      field('nome','Nome','text',x.nome) + field('idade','Idade','number',x.idade,{min:'5',max:'11',step:'1'}) +
-      '<button class="btn btn-primary" data-action="confirmar-editar-tutelado" data-id="'+x.id+'">Salvar</button>');
-  }
-  return '';
-}
-  
-function field(name,label,type,value,opts){
-  opts = opts || {};
-  var extra = '';
-  if(type==='number'){ extra += ' min="'+(opts.min!==undefined?opts.min:'0')+'" step="'+(opts.step||'0.01')+'" inputmode="decimal"'; }
-  if(opts.max!==undefined){ extra += ' max="'+opts.max+'"'; }
-  var tag = type==='textarea'
-    ? '<textarea id="mf-'+name+'" name="'+name+'"></textarea>'
-    : '<input id="mf-'+name+'" name="'+name+'" type="'+type+'" value="'+(value!==undefined?esc(value):'')+'"'+extra+'>';
-  var hint = opts.hint ? '<div class="hint">'+esc(opts.hint)+'</div>' : '';
-  return '<div class="field"><label for="mf-'+name+'">'+esc(label)+'</label>'+tag+hint+'</div>';
-}
-function sheetWrap(title, inner){
-  return '<div class="overlay" data-action="overlay-close">' +
-    '<div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(title)+'" data-stop="1">' +
-      '<div class="sheet-handle"></div>' +
-      '<div class="sheet-head"><h2 style="margin:0">'+esc(title)+'</h2><button class="icon-btn" style="width:34px;height:34px" data-action="close-modal" aria-label="Fechar">'+icon('close',16)+'</button></div>' +
-      inner +
-    '</div>' +
-  '</div>';
-}
-
-/* =====================================================================
-   ROTEADOR PRINCIPAL
-   ===================================================================== */
-function aplicarPreferencias(){
-  var root = document.documentElement;
-  var escuro = state.tema==='dark' || (state.tema==='auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  root.setAttribute('data-theme', escuro ? 'dark' : 'light');
-  root.setAttribute('data-cb', state.daltonico ? 'on' : 'off');
-  root.style.setProperty('--ui', String(state.escala));
-}
-function render(){
-  var app=document.getElementById('app');
-  aplicarPreferencias();
-  var isAdult = state.areaAtual==='adulto' && state.screen!=='login' && state.screen!=='cadastro';
-  var classeIdade = (state.areaAtual==='kids') ? ' '+ui().classe : '';
-  var classeEscala = state.escala>=1.3 ? ' ui-xl' : (state.escala>=1.15 ? ' ui-lg' : '');
-  app.className = 'app-shell' + (isAdult ? ' theme-adult' : '') + classeIdade + classeEscala;
-  var html='';
-  switch(state.screen){
-    case 'login': html=screenLogin(); break;
-    case 'cadastro': html=screenCadastro(); break;
-    case 'err404': html=screen404(); break;
-    case 'kids-inicio': html=screenKidsInicio(); break;
-    case 'kids-metas': html=screenKidsMetas(); break;
-    case 'kids-tarefas': html=screenKidsTarefas(); break;
-    case 'kids-solicitacoes': html=screenKidsSolicitacoes(); break;
-    case 'kids-perfil': html=screenKidsPerfil(); break;
-    case 'kids-avatar': html=screenKidsAvatar(); break;
-    case 'adulto-solicitacoes': html=screenAdultoSolicitacoes(); break;
-    case 'adulto-relatorio': html=screenAdultoRelatorio(); break;
-    case 'adulto-perfil': html=screenAdultoPerfil(); break;
-    case 'acessibilidade': html=screenAcessibilidade(); break;
-    case 'kids-assistente': html=screenKidsAssistente(); break;
-    case 'adulto-privacidade': html=screenPrivacidade(); break;
-    default: html=screen404();
-  }
-  if(state.modal){ html += modalHtml(state.modal.kind, state.modal.ctx||{}); }
-  app.innerHTML = html;
-}
-
-/* =====================================================================
-   AÇÕES (delegação de eventos)
-   ===================================================================== */
-document.addEventListener('click', function(e){
-  var target = e.target.closest('[data-action]');
-  if(!target){
-    if(state.notifOpen && !e.target.closest('.notif-panel') && !e.target.closest('[data-action="toggle-notif"]')){ state.notifOpen=false; render(); }
-    return;
-  }
-  var action = target.getAttribute('data-action');
-
-  if(action==='go'){ go(target.getAttribute('data-screen')); return; }
-  if(action==='toggle-notif'){ state.notifOpen=!state.notifOpen; render(); return; }
-  if(action==='toggle-senha'){ state.senhaVisivel=!state.senhaVisivel; render(); return; }
-  if(action==='esqueci-senha'){ toast('Em breve: recuperação de senha por e-mail.'); return; }
-  if(action==='demo-login'){
-    var area = target.getAttribute('data-area');
-    state.areaAtual = area;
-    go(area==='kids' ? 'kids-inicio' : 'adulto-solicitacoes'); return;
-  }
-  if(action==='toggle-goal'){ var id=target.getAttribute('data-id'); state.expandedGoal = (state.expandedGoal===id? null : id); render(); return; }
-  if(action==='avatar-cor'){ tutelado().corAvatar = target.getAttribute('data-cor'); render(); return; }
-  if(action==='avatar-roupa'){ tutelado().roupa = target.getAttribute('data-roupa'); render(); return; }
-  if(action==='troca-tutelado'){ return; } /* tratado no 'change' */
-
-  if(action==='toggle-tema'){
-    var escuroAgora = document.documentElement.getAttribute('data-theme')==='dark';
-    state.tema = escuroAgora ? 'light' : 'dark';
-    render(); toast(state.tema==='dark' ? 'Tema escuro ativado.' : 'Tema claro ativado.'); return;
-  }
-  if(action==='set-tema'){
-    state.tema = target.getAttribute('data-tema');
-    render();
-    toast(state.tema==='auto' ? 'O tema vai seguir o seu aparelho.' : (state.tema==='dark'?'Tema escuro ativado.':'Tema claro ativado.'));
-    return;
-  }
-  if(action==='set-escala'){
-    state.escala = parseFloat(target.getAttribute('data-escala'));
-    render();
-    toast('Tamanho da interface: '+Math.round(state.escala*100)+'%.'); return;
-  }
-  if(action==='toggle-daltonico'){
-    state.daltonico = !state.daltonico;
-    render(); toast(state.daltonico ? 'Paleta para daltonismo ativada.' : 'Paleta de cores padrão restaurada.'); return;
-  }
-  if(action==='sair'){
-    state.areaAtual=null; state.modal=null; state.notifOpen=false; state.tuteladoId=db.tutelados[0].id;
-    go('login'); toast('Você saiu da conta.'); return;
-  }
-
-  if(action==='modal'){
-    var ctx={}; if(target.hasAttribute('data-id')) ctx.id=target.getAttribute('data-id'); if(target.hasAttribute('data-op')) ctx.op=target.getAttribute('data-op');
-    state.modal={kind:target.getAttribute('data-modal'), ctx:ctx}; render(); return;
-  }
-  if(action==='close-modal'){ state.modal=null; render(); return; }
-  if(action==='overlay-close'){
-    /* só fecha quando o clique foi realmente no fundo escurecido, nunca dentro da folha */
-    if(e.target.closest('[data-stop]')) return;
-    state.modal=null; render(); return;
-  }
-
-  if(action==='req-aprovar'){ setReqStatus(target.getAttribute('data-id'),'processando'); toast('Solicitação aprovada — aguardando confirmação de consumo.'); return; }
-  if(action==='req-recusar'){ setReqStatus(target.getAttribute('data-id'),'recusada'); toast('Solicitação recusada.'); return; }
-  if(action==='req-confirmar'){ setReqStatus(target.getAttribute('data-id'),'aprovada'); toast('Conclusão confirmada!'); return; }
-
-  if(action==='enviar-prova'){
-    var id=target.getAttribute('data-id'); state.modal=null; render();
-    toast('Enviando foto e analisando com IA on-device…');
-    setTimeout(function(){
-      var tk=tutelado(); var task=tk.tarefas.find(function(x){return x.id===id;});
-      if(task){ task.status='concluida'; tk.saldo+=task.recompensa; toast('Prova validada! +'+brl(task.recompensa)+' creditado (simulação).'); render(); }
-    }, 1100);
-    return;
-  }
-
-  if(action==='salvar-meta'){
-    var nome=val('mf-nome'), descricao=val('mf-descricao'), total=parseFloat(val('mf-total'));
-    if(!nome){ toast('Dê um nome para a sua meta.'); return; }
-    if(!(total>0)){ toast('O valor da meta precisa ser maior que zero.'); return; }
-    tutelado().metas.push({id:'m'+Date.now(), nome:nome, descricao:descricao||'Sem descrição.', total:total, dep:0, concluida:false});
-    state.modal=null; toast('Meta criada!'); render(); return;
-  }
-  if(action==='confirmar-meta-valor'){
-    var id=target.getAttribute('data-id'), op=target.getAttribute('data-op');
-    var v=parseFloat(val('mf-valor')); var tk=tutelado();
-    var g=tk.metas.find(function(x){return x.id===id;});
-    if(!g){ return; }
-    if(!(v>0)){ toast('Digite um valor maior que zero.'); return; }
-    if(op==='depositar'){
-      var maxDep = Math.min(tk.saldo, g.total-g.dep);
-      if(v>maxDep){ toast('Você pode guardar no máximo '+brl(maxDep)+' agora.'); return; }
-      g.dep += v; tk.saldo -= v;
-      if(g.dep>=g.total){ g.concluida=true; toast('🎉 Meta concluída!'); } else { toast('Guardado na meta!'); }
-    } else {
-      if(v>g.dep){ toast('Você só tem '+brl(g.dep)+' guardado nesta meta.'); return; }
-      g.dep -= v; tk.saldo += v; g.concluida = g.dep>=g.total;
-      toast('Valor devolvido ao seu saldo.');
-    }
-    state.modal=null; render(); return;
-  }
-  if(action==='salvar-tarefa'){
-    var n=val('mf-nome'), d=val('mf-descricao'), r=parseFloat(val('mf-recompensa'));
-    if(!n){ toast('Dê um nome para a tarefa.'); return; }
-    if(!(r>0)){ toast('A recompensa precisa ser maior que zero.'); return; }
-    tutelado().tarefas.push({id:'k'+Date.now(), nome:n, descricao:d||'Sem descrição.', recompensa:r, status:'pendente', prazo:'Hoje'});
-    state.modal=null; toast('Tarefa criada!'); render(); return;
-  }
-  if(action==='salvar-solicitacao'){
-    var n2=val('mf-nome'), d2=val('mf-descricao'), v2=parseFloat(val('mf-valor'));
-    if(!n2){ toast('Conte o que você quer pedir.'); return; }
-    if(!(v2>0)){ toast('O valor precisa ser maior que zero.'); return; }
-    /* antes de confirmar, o motor de nudge mostra o impacto nas metas */
-    state.pendenteSolic = {nome:n2, descricao:d2||'Sem descrição.', valor:v2};
-    state.modal = {kind:'nudge', ctx:{}};
-    render(); return;
-  }
-  if(action==='chat-perguntar'){
-    var idx = parseInt(target.getAttribute('data-idx'),10);
-    var pp = PERGUNTAS[idx]; if(!pp) return;
-    var resposta = pp.a;
-    if(resposta===null){
-      var tk3=tutelado();
-      var aberta = tk3.metas.filter(function(g){return !g.concluida;})
-                            .sort(function(a,b){ return (b.dep/b.total)-(a.dep/a.total); })[0];
-      resposta = aberta
-        ? 'Para a meta "'+aberta.nome+'" faltam '+brl(aberta.total-aberta.dep)+'. Você já guardou '+brl(aberta.dep)+' — está em '+pct(aberta.dep,aberta.total)+'% do caminho!'
-        : 'Você ainda não tem uma meta em andamento. Crie uma na aba de metas e eu acompanho o seu progresso!';
-    }
-    state.chat.push({de:'crianca', texto:pp.q});
-    state.chat.push({de:'bot', texto:resposta});
-    render(); return;
-  }
-  if(action==='chat-limpar'){ state.chat=[]; render(); return; }
-  if(action==='toggle-consent'){
-    var chave = target.getAttribute('data-chave');
-    db.consentimentos[chave] = !db.consentimentos[chave];
-    render();
-    toast(db.consentimentos[chave] ? 'Permissão concedida.' : 'Permissão revogada.');
-    return;
-  }
-  if(action==='revogar-tudo'){
-    db.consentimentos.triagemImagem=false; db.consentimentos.assistente=false; db.consentimentos.relatorios=false;
-    render(); toast('Todos os consentimentos foram revogados.'); return;
-  }
-  if(action==='nudge-confirmar'){
-    var ps = state.pendenteSolic; if(!ps){ state.modal=null; render(); return; }
-    var tk2 = tutelado();
-    tk2.solicitacoes.unshift({id:'s'+Date.now(), nome:ps.nome, descricao:ps.descricao, valor:ps.valor, status:'pendente'});
-    db.notificacoes.unshift({id:'n'+Date.now(), texto:'Nova solicitação de '+tk2.nome+': '+ps.nome+'.', lida:false});
-    state.pendenteSolic=null; state.modal=null;
-    toast('Pedido enviado para '+db.responsavel.nome.split(' ')[0]+'.'); render(); return;
-  }
-  if(action==='nudge-repensar'){
-    state.pendenteSolic=null; state.modal=null;
-    toast('Tudo bem! O pedido não foi enviado.'); render(); return;
-  }
-  if(action==='confirmar-add-saldo'){
-    var v3=parseFloat(val('mf-valor'));
-    if(!(v3>0)){ toast('Informe um valor maior que zero.'); return; }
-    tutelado().saldo += v3; state.modal=null; toast('Saldo adicionado!'); render(); return;
-  }
-  if(action==='confirmar-add-tutelado'){
-    var n3=val('mf-nome'), i3=parseInt(val('mf-idade'),10);
-    if(!n3){ toast('Informe o nome do tutelado.'); return; }
-    if(!(i3>=5 && i3<=11)){ toast('A idade precisa estar entre 5 e 11 anos.'); return; }
-    var emojis=['🐨','🦁','🐸','🦄','🐯','🐵','🐶'];
-    var novo={id:'t'+Date.now(), nome:n3, idade:i3, emoji:emojis[db.tutelados.length%emojis.length], corAvatar:'#E3F3EC', saldo:0, roupa:'👒', metas:[], tarefas:[], solicitacoes:[]};
-    db.tutelados.push(novo);
-    state.tuteladoId = novo.id;
-    state.modal=null; toast(n3+' foi adicionado(a)!'); render(); return;
-  }
-  if(action==='confirmar-editar-tutelado'){
-    var id4=target.getAttribute('data-id'); var x=db.tutelados.find(function(u){return u.id===id4;});
-    var novaIdade=parseInt(val('mf-idade'),10);
-    if(val('mf-idade') && !(novaIdade>=5 && novaIdade<=11)){ toast('A idade precisa estar entre 5 e 11 anos.'); return; }
-    x.nome=val('mf-nome')||x.nome; if(novaIdade>=5 && novaIdade<=11){ x.idade=novaIdade; }
-    state.modal=null; toast('Dados atualizados!'); render(); return;
-  }
-  if(action==='excluir-tutelado'){
-    var id5=target.getAttribute('data-id');
-    if(db.tutelados.length<=1){ toast('É preciso manter ao menos um tutelado.'); return; }
-    db.tutelados = db.tutelados.filter(function(u){return u.id!==id5;});
-    if(state.tuteladoId===id5){ state.tuteladoId=db.tutelados[0].id; }
-    toast('Tutelado removido.'); render(); return;
-  }
-});
-
-document.addEventListener('change', function(e){
-  if(e.target.matches('[data-action="troca-tutelado"]')){ state.tuteladoId = e.target.value; render(); }
-});
-document.addEventListener('submit', function(e){
-  var form = e.target.closest('[data-form]'); if(!form) return;
-  e.preventDefault();
-  var kind = form.getAttribute('data-form');
-  if(kind==='login'){ state.areaAtual='kids'; go('kids-inicio'); toast('Login simulado — entrando na área da criança.'); }
-  if(kind==='cadastro'){ toast('Conta criada com sucesso (simulação).'); go('login'); }
-});
-function val(id){ var el=document.getElementById(id); return el? el.value.trim() : ''; }
-function setReqStatus(id, status){
-  var t=tutelado(); var s=t.solicitacoes.find(function(x){return x.id===id;}); if(s) s.status=status; render();
-}
-
-if(window.matchMedia){
-  var mq = window.matchMedia('(prefers-color-scheme: dark)');
-  var onChange = function(){ if(state.tema==='auto'){ aplicarPreferencias(); } };
-  if(mq.addEventListener){ mq.addEventListener('change', onChange); } else if(mq.addListener){ mq.addListener(onChange); }
-}
-render();
-</script>
-</body>
-</html>
+      '<div class="card card-tight" style="max-width:82%;margin:0
