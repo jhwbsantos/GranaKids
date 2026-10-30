@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grana Kids — Protótipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+/* Tema CLARO (padrão) */
+:root{
+  --page:#EDEAE0;
+  --bg:#FFF6E9; --bg-adult:#F2F6F4; --surface:#FFFFFF;
+  --ink:#16231F; --ink-soft:#4E6059; --ink-faint:#8B9A93;
+  --primary:#1B7A62; --primary-dark:#124F40; --primary-soft:#E3F3EC;
+  --gold:#F2B134; --gold-ink:#8A5A05; --gold-soft:#FDF0D2;
+  --coral:#C43B27; --coral-soft:#FDE7E2;
+  --line:#EAE2D0; --line-adult:#DEE7E2;
+  --success:#2E9E6D; --success-ink:#1D6E4C; --success-bg:#E1F4EB;
+  --pending:#8A5A05; --pending-bg:#FDEFCF;
+  --danger:#A5352B; --danger-bg:#FBE6E3;
+  --saldo-grad:linear-gradient(135deg, #1B7A62 0%, #124F40 100%);
+  --nav-active-bg:#E3F3EC; --nav-active-ink:#124F40; --focus:#124F40;
+  --ui:1; /* escala da interface (acessibilidade visual) */
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-pill:999px;
+  --shadow:0 1px 2px rgba(22,35,31,.06), 0 6px 16px rgba(22,35,31,.07);
+  --font-display:'Baloo 2', ui-rounded, 'Segoe UI Rounded', system-ui, sans-serif;
+  --font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+/* Tema ESCURO — contrastes recalculados (todos >= 4,5:1) */
+html[data-theme="dark"]{
+  --page:#0D0B08;
+  --bg:#211A12; --bg-adult:#121917; --surface:#2C2318;
+  --ink:#F3ECDF; --ink-soft:#C7BCA9; --ink-faint:#9C9080;
+  --primary:#3BA588; --primary-dark:#2E8A71; --primary-soft:#1E3A31;
+  --gold:#F2C158; --gold-ink:#F2C158; --gold-soft:#3A2C10;
+  --coral:#E8705C; --coral-soft:#3A1D1A;
+  --line:#3E3324; --line-adult:#2A3633;
+  --success:#6FE3B4; --success-ink:#6FE3B4; --success-bg:#163227;
+  --pending:#F2C158; --pending-bg:#3A2C10;
+  --danger:#F2938A; --danger-bg:#3A1D1A;
+  --saldo-grad:linear-gradient(135deg, #1E5B4B 0%, #123A30 100%);
+  --nav-active-bg:#1E3A31; --nav-active-ink:#5BE0BA; --focus:#7FE9C6;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 16px rgba(0,0,0,.45);
+}
+html[data-theme="dark"] .app-shell.theme-adult{ --surface:#1B2422; --ink:#EDF3F0; --ink-soft:#AEBDB7; }
+/* Modo DALTÔNICO — status deixam de usar verde/vermelho e passam a azul/laranja/roxo */
+html[data-cb="on"]{
+  --success:#00507D; --success-ink:#00507D; --success-bg:#DCEBF5;
+  --pending:#8A5300; --pending-bg:#FCEBD0;
+  --danger:#8A3F68; --danger-bg:#F7E2EE;
+  --coral:#8A3F68;
+}
+html[data-cb="on"][data-theme="dark"]{
+  --success:#7EC8ED; --success-ink:#7EC8ED; --success-bg:#122A38;
+  --pending:#F2C177; --pending-bg:#3A2A10;
+  --danger:#EBAFD2; --danger-bg:#391B2E;
+  --coral:#EBAFD2;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--page); font-family:var(--font-body); color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+img,svg{display:block;}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;}
+:focus-visible{outline:3px solid var(--focus); outline-offset:2px; border-radius:4px;}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+
+/* ============ STAGE / APP SHELL ============ */
+#stage{min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding:0;}
+.app-shell{
+  /* zoom redesenha o texto em vetor (não amplia bitmap), então a leitura
+     fica maior sem perder nitidez; a largura/altura são divididas pela
+     escala para que a moldura do aparelho continue do mesmo tamanho */
+  zoom:var(--ui);
+  width:calc(100% / var(--ui)); max-width:460px; height:calc(100vh / var(--ui));
+  background:var(--bg);
+  position:relative; display:flex; flex-direction:column; overflow:hidden;
+  transition:background .25s ease;
+}
+@media (min-width:640px){
+  #stage{ align-items:center; padding:36px 16px; }
+  .app-shell{ height:calc(860px / var(--ui)); border-radius:36px; box-shadow:0 24px 70px rgba(20,25,22,.28); border:1px solid rgba(0,0,0,.05); }
+}
+.app-shell.theme-adult{ background:var(--bg-adult); }
+
+.screen{flex:1; overflow-y:auto; padding:14px 18px 18px; -webkit-overflow-scrolling:touch;}
+.screen.no-nav-pad{padding-bottom:24px;}
+.screen::-webkit-scrollbar{width:0;}
+
+/* ============ TOPBAR ============ */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:16px 18px 8px; position:sticky; top:0; z-index:6; background:var(--bg);
+}
+.theme-adult .topbar{background:var(--bg-adult);}
+.icon-btn{
+  width:42px; height:42px; border-radius:var(--r-pill); border:none; background:var(--surface);
+  display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); color:var(--ink); position:relative; flex:none;
+}
+.icon-btn:active{transform:scale(.94);}
+.avatar-chip{
+  width:42px; height:42px; border-radius:var(--r-pill); background:var(--primary-soft); border:2px solid var(--surface);
+  display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:var(--shadow); flex:none; padding:0;
+}
+.theme-adult .avatar-chip{background:#E4EEEA;}
+.topbar-title{font-family:var(--font-display); font-weight:700; font-size:19px; text-align:center; flex:1; min-width:0; line-height:1.2; overflow-wrap:anywhere;}
+.theme-adult .topbar-title{font-family:var(--font-body); font-weight:800; font-size:17px;}
+.badge-dot{
+  position:absolute; top:-2px; right:-2px; min-width:16px; height:16px; padding:0 3px; border-radius:var(--r-pill);
+  background:var(--coral); color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; border:2px solid var(--bg);
+}
+
+/* ============ BOTTOM NAV ============ */
+.bottomnav{
+  display:flex; justify-content:space-between; align-items:stretch; padding:8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+  background:var(--surface); border-top:1px solid var(--line); position:sticky; bottom:0; z-index:6;
+}
+.theme-adult .bottomnav{border-top:1px solid var(--line-adult);}
+.nav-btn{
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:3px;
+  background:none; border:none; color:var(--ink-faint);
+  font-size:11px; font-weight:800; padding:7px 6px; border-radius:14px;
+  flex:1 1 0; min-width:0; text-align:center; line-height:1.15; hyphens:auto;
+}
+.nav-btn[aria-current="page"]{color:var(--nav-active-ink); background:var(--nav-active-bg);}
+.theme-adult .nav-btn[aria-current="page"]{color:var(--nav-active-ink); background:var(--nav-active-bg);}
+
+/* ============ TYPO ============ */
+h1,h2,h3{font-family:var(--font-display); margin:0 0 4px; font-weight:700; color:var(--ink);}
+.theme-adult h1, .theme-adult h2, .theme-adult h3{font-family:var(--font-body); font-weight:800;}
+h1{font-size:24px;} h2{font-size:18px;} h3{font-size:15px;}
+p{margin:0; line-height:1.45;}
+.muted{color:var(--ink-soft); font-size:13px;}
+.section-title{display:flex; align-items:baseline; justify-content:space-between; margin:22px 0 10px;}
+.section-title h2{margin:0;}
+.link-btn{background:none; border:none; color:var(--primary); font-weight:800; font-size:13px; padding:4px 2px;}
+.theme-adult .link-btn{color:var(--primary-dark);}
+
+/* ============ CARDS ============ */
+.card{background:var(--surface); border-radius:var(--r-md); padding:14px 16px; box-shadow:var(--shadow); margin-bottom:10px;}
+.card-tight{padding:12px 14px;}
+.row{display:flex; align-items:center; gap:10px;}
+.row-between{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.stack{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.ellipsis{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+/* saldo hero */
+.saldo-card{
+  background:var(--saldo-grad); color:#fff; border-radius:var(--r-lg);
+  padding:20px; box-shadow:var(--shadow); margin-bottom:6px;
+}
+.saldo-card .muted{color:rgba(255,255,255,.78);}
+.saldo-valor{font-family:var(--font-display); font-size:34px; font-weight:800; margin-top:2px; display:flex; align-items:center; gap:8px; white-space:nowrap;}
+.theme-adult .saldo-card{background:var(--saldo-grad);}
+.theme-adult .saldo-valor{font-family:var(--font-body); font-weight:900;}
+
+/* pills */
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:800; padding:4px 10px; border-radius:var(--r-pill); white-space:nowrap;}
+.pill-pending{background:var(--pending-bg); color:var(--pending);}
+.pill-success{background:var(--success-bg); color:var(--success-ink);}
+.pill-danger{background:var(--danger-bg); color:var(--danger);}
+.pill-neutral{background:#EEF1EF; color:var(--ink-soft);}
+
+/* progress */
+.progress-track{height:10px; border-radius:var(--r-pill); background:var(--line); overflow:hidden; margin:8px 0 4px;}
+.theme-adult .progress-track{background:var(--line-adult);}
+.progress-fill{height:100%; background:linear-gradient(90deg, var(--gold), var(--primary)); border-radius:var(--r-pill);}
+
+/* buttons */
+.btn{border:none; border-radius:var(--r-pill); font-weight:800; font-size:14px; padding:12px 18px; display:inline-flex; align-items:center; justify-content:center; gap:6px; width:100%;}
+.btn-primary{background:var(--primary); color:#fff;}
+.btn-primary:active{background:var(--primary-dark);}
+.theme-adult .btn-primary{background:var(--primary-dark);}
+.btn-secondary{background:var(--surface); color:var(--ink); border:1.5px solid var(--line);}
+.theme-adult .btn-secondary{border-color:var(--line-adult);}
+.btn-ghost{background:none; color:var(--primary); font-weight:800; border:none;}
+.theme-adult .btn-ghost{color:var(--primary-dark);}
+.btn-danger-outline{background:var(--danger-bg); color:var(--danger);}
+.btn-success-outline{background:var(--success-bg); color:var(--success-ink);}
+.btn-sm{padding:8px 12px; font-size:13px; width:auto;}
+.btn-row{display:flex; gap:8px;}
+.btn-row .btn{flex:1;}
+.fab-row{margin:14px 0;}
+
+/* task/goal/request card variants by status */
+.tile{border-radius:var(--r-md); padding:14px; margin-bottom:10px; box-shadow:var(--shadow);}
+.tile-pending{background:var(--pending-bg);}
+.tile-success{background:var(--success-bg);}
+.tile-danger{background:var(--danger-bg);}
+.tile-neutral{background:var(--surface);}
+.tile-title{font-weight:800; font-size:15px; margin-bottom:2px;}
+.tile-desc{font-size:13px; color:var(--ink-soft); margin-bottom:8px;}
+.tile-foot{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.reward{font-weight:800; font-size:13px; display:flex; align-items:center; gap:4px;}
+
+/* forms */
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:13px; font-weight:800; margin-bottom:6px; color:var(--ink);}
+.field .hint{font-size:12px; color:var(--ink-soft); margin-top:5px;}
+.input-wrap{position:relative;}
+.field input, .field select, .field textarea{
+  width:100%; padding:12px 14px; border-radius:var(--r-sm); border:1.5px solid var(--line); background:var(--surface);
+  font-size:15px; color:var(--ink);
+}
+.theme-adult .field input, .theme-adult .field select, .theme-adult .field textarea{border-color:var(--line-adult);}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--primary);}
+.field textarea{resize:vertical; min-height:64px;}
+.eye-toggle{position:absolute; right:8px; top:6px; background:none; border:none; width:34px; height:34px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); border-radius:var(--r-pill);}
+
+/* auth screens */
+.auth-wrap{padding:0 22px; min-height:100%; display:flex; flex-direction:column;}
+.auth-hero{padding:34px 0 18px; text-align:center;}
+.logo-mark{width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:var(--primary); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);}
+.auth-hero h1{font-size:26px;}
+.demo-box{border:1.5px dashed var(--line); border-radius:var(--r-md); padding:12px 14px; margin-top:18px; background:rgba(255,255,255,.5);}
+.demo-box p{font-size:12px; color:var(--ink-soft); margin-bottom:8px;}
+
+/* notif dropdown */
+.notif-panel{
+  position:absolute; top:52px; right:-4px; width:min(290px, 82vw); background:var(--surface); border-radius:var(--r-md);
+  box-shadow:0 10px 30px rgba(20,25,22,.22); z-index:20; overflow:hidden; border:1px solid var(--line);
+}
+.notif-panel h3{padding:14px 16px 8px; margin:0; border-bottom:1px solid var(--line);}
+.notif-item{padding:12px 16px; border-bottom:1px solid var(--line); font-size:13px; display:flex; gap:8px; align-items:flex-start;}
+.notif-item:last-child{border-bottom:none;}
+.notif-dot{width:8px; height:8px; border-radius:50%; background:var(--coral); margin-top:5px; flex:none;}
+.notif-empty{padding:20px 16px; text-align:center; color:var(--ink-soft); font-size:13px;}
+
+/* modal / sheet */
+.overlay{position:absolute; inset:0; background:rgba(16,24,20,.45); z-index:30; display:flex; align-items:flex-end; justify-content:center;}
+@media (min-width:640px){ .overlay{align-items:center;} }
+.sheet{
+  background:var(--surface); width:100%; max-width:460px; border-radius:22px 22px 0 0; padding:18px 20px calc(20px + env(safe-area-inset-bottom,0px));
+  max-height:88vh; overflow-y:auto; box-shadow:0 -10px 40px rgba(0,0,0,.25);
+}
+@media (min-width:640px){ .sheet{border-radius:22px; max-height:80vh;} }
+.sheet-handle{width:40px; height:4px; background:var(--line); border-radius:var(--r-pill); margin:0 auto 14px;}
+.sheet-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+
+/* toast */
+#toast-host{position:fixed; top:18px; left:0; right:0; display:flex; justify-content:center; z-index:60; pointer-events:none;}
+.toast{background:var(--ink); color:#fff; padding:11px 18px; border-radius:var(--r-pill); font-size:13px; font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:88%; text-align:center;}
+
+/* ---- adaptação por faixa etária ---- */
+.age-small{ --r-md:20px; --r-lg:26px; }
+.age-small .screen{ font-size:17px; }
+.age-small h1{font-size:27px;} .age-small h2{font-size:21px;}
+.age-small .btn{ padding:15px 20px; font-size:16px; }
+.age-small .tile-title{ font-size:17px; }
+.age-small .tile-desc, .age-small .muted{ font-size:15px; }
+.age-small .nav-btn{ font-size:12px; padding:9px 12px; }
+.age-small .saldo-valor{ font-size:38px; }
+.age-mid .screen{ font-size:15px; }
+.age-big .screen{ font-size:15px; }
+.age-big h1{font-size:22px;} .age-big h2{font-size:17px;}
+.age-big .topbar-title, .age-big h1, .age-big h2, .age-big h3{ font-family:var(--font-body); font-weight:800; }
+.age-big .saldo-valor{ font-family:var(--font-body); font-weight:900; font-size:30px; }
+
+/* ---- ajustes finos para escalas de interface ampliadas ---- */
+.ui-lg .nav-btn{ font-size:10px; }
+.ui-lg .saldo-valor{ font-size:30px; }
+.ui-xl .nav-btn{ font-size:9px; gap:2px; padding:7px 3px; }
+.ui-xl .saldo-valor{ font-size:26px; }
+.ui-xl h1{ font-size:21px; } .ui-xl h2{ font-size:17px; }
+.ui-xl .topbar-title{ font-size:16px; }
+.ui-xl.age-small .screen, .ui-xl .screen{ font-size:15px; }
+
+/* mascote (apenas 5–7 anos) */
+.mascote{ display:flex; align-items:center; justify-content:flex-end; gap:8px; margin:2px 0 10px; }
+.mascote-bolha{
+  background:var(--surface); border-radius:var(--r-pill); padding:9px 14px; font-size:14px; font-weight:700;
+  box-shadow:var(--shadow); color:var(--ink);
+}
+.mascote-emoji{ font-size:34px; line-height:1; }
+
+/* linha de opção (configurações) */
+.opt-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+.opt-row:last-child{ border-bottom:none; }
+.theme-adult .opt-row{ border-bottom-color:var(--line-adult); }
+.opt-text{ min-width:0; }
+.opt-text strong{ display:block; font-size:14px; }
+.opt-text span{ font-size:12.5px; color:var(--ink-soft); }
+.switch{
+  flex:none; width:54px; height:31px; border-radius:var(--r-pill); border:2px solid var(--line); background:var(--line);
+  position:relative; padding:0; transition:background .2s ease, border-color .2s ease;
+}
+.theme-adult .switch{ border-color:var(--line-adult); background:var(--line-adult); }
+.switch[aria-checked="true"]{ background:var(--primary); border-color:var(--primary); }
+.switch .knob{
+  position:absolute; top:2px; left:2px; width:23px; height:23px; border-radius:50%; background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.35); transition:transform .2s ease;
+}
+.switch[aria-checked="true"] .knob{ transform:translateX(23px); }
+.seg{ display:flex; flex-wrap:wrap; gap:6px; background:var(--line); padding:4px; border-radius:var(--r-lg); }
+.theme-adult .seg{ background:var(--line-adult); }
+.seg button{
+  flex:1 1 auto; min-width:86px; border:none; background:none; padding:9px 10px; border-radius:var(--r-pill);
+  font-weight:800; font-size:13px; color:var(--ink-soft); white-space:nowrap;
+}
+.seg button[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
+
+/* misc */
+.empty-state{text-align:center; padding:34px 12px; color:var(--ink-soft);}
+.empty-state .big-emoji{font-size:38px; display:block; margin-bottom:10px;}
+.divider{height:1px; background:var(--line); margin:18px 0;}
+.theme-adult .divider{background:var(--line-adult);}
+.avatar-lg{width:88px; height:88px; border-radius:50%; background:var(--primary-soft); display:flex; align-items:center; justify-content:center; font-size:42px; margin:0 auto; border:3px solid var(--surface); box-shadow:var(--shadow);}
+.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0;}
+.stat-box{background:var(--surface); border-radius:var(--r-md); padding:14px; box-shadow:var(--shadow);}
+.stat-num{font-family:var(--font-body); font-weight:900; font-size:22px; color:var(--primary-dark);}
+.stat-label{font-size:12px; color:var(--ink-soft); font-weight:700; margin-top:2px;}
+.swatch-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+.swatch{width:44px; height:44px; border-radius:50%; border:3px solid transparent; display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--surface); box-shadow:var(--shadow);}
+.swatch[aria-pressed="true"]{border-color:var(--primary-dark);}
+.chip-select{display:flex; align-items:center; gap:10px; background:var(--surface); border-radius:var(--r-pill); padding:6px 8px 6px 6px; box-shadow:var(--shadow); width:fit-content;}
+.chip-select select{border:none; background:none; font-weight:800; font-size:13px; padding:2px 4px;}
+.back-row{display:flex; align-items:center; gap:10px; margin-bottom:4px;}
+.donut-wrap{display:flex; align-items:center; gap:16px;}
+.donut-legend{font-size:12px; display:flex; flex-direction:column; gap:6px;}
+.legend-dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:6px;}
+</style>
+</head>
+<body>
+<div id="stage"><div id="app" class="app-shell" role="application" aria-label="Grana Kids"></div></div>
+<div id="toast-host" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   GRANA KIDS — PROTÓTIPO DE FRONT-END (mock, sem back-end real)
+   Todos os dados abaixo são fictícios e vivem apenas em memória (JS).
+   ===================================================================== */
+
+/* ---------- ícones (SVG simples, originais, stroke=currentColor) ---------- */
+function icon(name, size){
+  size = size || 22;
+  var s = 'width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  var paths = {
+    home: '<path '+s+' d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1Z"/></svg>',
+    rocket: '<svg '+s+'><path d="M12 3c2.8 1.4 4.5 4.3 4.5 7.8 0 2-.6 3.9-1.7 5.6l-2.8 2.6-2.8-2.6C8.1 14.7 7.5 12.8 7.5 10.8 7.5 7.3 9.2 4.4 12 3Z"/><circle cx="12" cy="10" r="1.6"/><path d="M9 16.5 7 20M15 16.5l2 3.5"/></svg>',
+    check: '<svg '+s+'><path d="M4.5 12.5 9 17l10.5-10.5"/></svg>',
+    clipboard: '<svg '+s+'><rect x="5" y="4.5" width="14" height="16" rx="2"/><rect x="9" y="3" width="6" height="3" rx="1"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4.5"/></svg>',
+    user: '<svg '+s+'><circle cx="12" cy="8.3" r="3.3"/><path d="M5 20c.7-3.6 3.6-6 7-6s6.3 2.4 7 6"/></svg>',
+    tray: '<svg '+s+'><path d="M4 13 7 5h10l3 8"/><path d="M4 13v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5h-4.5a1 1 0 0 0-.9.6l-.6 1.4a1 1 0 0 1-.9.6h-4.2a1 1 0 0 1-.9-.6l-.6-1.4a1 1 0 0 0-.9-.6Z"/></svg>',
+    chart: '<svg '+s+'><path d="M5 20V10M11 20V4M17 20v-7"/><path d="M3 20h18"/></svg>',
+    bell: '<svg '+s+'><path d="M6 10a6 6 0 1 1 12 0c0 3 1 4.5 1.5 5.5H4.5C5 14.5 6 13 6 10Z"/><path d="M10 19.5a2 2 0 0 0 4 0"/></svg>',
+    plus: '<svg '+s+'><path d="M12 5v14M5 12h14"/></svg>',
+    chevronRight: '<svg '+s+'><path d="M9 5.5 15.5 12 9 18.5"/></svg>',
+    chevronDown: '<svg '+s+'><path d="M5.5 9 12 15.5 18.5 9"/></svg>',
+    chevronLeft: '<svg '+s+'><path d="M15 5.5 8.5 12l6.5 6.5"/></svg>',
+    camera: '<svg '+s+'><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h1.9l1-1.6a1 1 0 0 1 .85-.4h5.5a1 1 0 0 1 .85.4l1 1.6h1.9A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5Z"/><circle cx="12" cy="12.5" r="3.3"/></svg>',
+    close: '<svg '+s+'><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    pencil: '<svg '+s+'><path d="M5 19.5 5.8 16 16 5.8a1.8 1.8 0 0 1 2.5 0l.2.2a1.8 1.8 0 0 1 0 2.5L8.5 18.7l-3.5.8Z"/></svg>',
+    trash: '<svg '+s+'><path d="M5 7h14M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M7 7l1 12.5a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L18 7"/></svg>',
+    eye: '<svg '+s+'><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.4"/></svg>',
+    eyeOff: '<svg '+s+'><path d="M3 12s3.2-6 9-6c1.7 0 3.1.4 4.3 1M21 12s-3.2 6-9 6c-1.7 0-3.1-.4-4.3-1"/><path d="M4 4l16 16M9.9 10a2.4 2.4 0 0 0 3.4 3.4"/></svg>',
+    coin: '<svg '+s+'><circle cx="12" cy="12" r="8.5"/><path d="M12 8.3v7.4M9.6 9.7c0-1 1-1.5 2.4-1.5s2.4.6 2.4 1.4c0 2-4.8 1-4.8 3 0 .9 1 1.5 2.4 1.5s2.4-.5 2.4-1.5" style="stroke-linecap:round"/></svg>',
+    sparkle: '<svg '+s+'><path d="M12 3.5 13.4 9l5.6 1.5-5.6 1.5L12 17.5 10.6 12 5 10.5 10.6 9Z"/></svg>'
+  };
+  return paths[name] || '';
+}
+
+/* ---------- dados mock (memória apenas, sem persistência real) ---------- */
+var db = {
+  responsavel:{ nome:'Claudia Manoela', apelido:'claudia.m', emoji:'👩🏽' },
+  tutelados:[
+    { id:'t1', nome:'Maria', idade:9, emoji:'🦊', corAvatar:'#E3F3EC', saldo:42.50, roupa:'👒',
+      metas:[
+        {id:'m1', nome:'Bicicleta nova', descricao:'Guardar para trocar de bicicleta por uma aro 20 vermelha.', total:250, dep:180, concluida:false},
+        {id:'m2', nome:'Caderno de desenho', descricao:'Um caderno grande de folhas lisas para os desenhos da Maria.', total:30, dep:30, concluida:true},
+        {id:'m3', nome:'Passeio no parque aquático', descricao:'Ingresso para o parque aquático nas próximas férias.', total:80, dep:22, concluida:false},
+        {id:'m4', nome:'Jogo do sistema solar', descricao:'Jogo de tabuleiro educativo sobre os planetas.', total:45, dep:10, concluida:false}
+      ],
+      tarefas:[
+        {id:'k1', nome:'Arrumar a cama', descricao:'Deixar a cama arrumada antes de ir para a escola.', recompensa:2, status:'pendente', prazo:'Hoje'},
+        {id:'k2', nome:'Separar o lixo reciclável', descricao:'Separar papel, plástico e vidro na área de serviço.', recompensa:3, status:'pendente', prazo:'Hoje'},
+        {id:'k3', nome:'Regar as plantas', descricao:'Regar os vasos da varanda antes do almoço.', recompensa:1.5, status:'concluida', prazo:'Ontem'},
+        {id:'k4', nome:'Guardar os brinquedos', descricao:'Guardar os brinquedos da sala antes de dormir.', recompensa:2, status:'nao_concluida', prazo:'Anteontem'}
+      ],
+      solicitacoes:[
+        {id:'s1', nome:'Figurinhas de dinossauro', descricao:'Pacote de figurinhas vendido na cantina da escola.', valor:8, status:'pendente'},
+        {id:'s2', nome:'Sorvete no fim de semana', descricao:'Sorvete de chocolate na sorveteria do bairro.', valor:12, status:'processando'},
+        {id:'s3', nome:'Livro de aventuras', descricao:'Livro novo da coleção de aventuras da biblioteca da escola.', valor:25, status:'aprovada'},
+        {id:'s4', nome:'Carrinho de brinquedo', descricao:'Carrinho de brinquedo grande da loja do shopping.', valor:60, status:'recusada'}
+      ]
+    },
+    { id:'t2', nome:'João', idade:6, emoji:'🐼', corAvatar:'#FDF0D2', saldo:15.00, roupa:'🕶️',
+      metas:[
+        {id:'m5', nome:'Bola de futebol', descricao:'Uma bola nova para jogar no fim de semana.', total:40, dep:15, concluida:false},
+        {id:'m6', nome:'Quebra-cabeça de dinossauros', descricao:'Quebra-cabeça de 100 peças.', total:25, dep:25, concluida:true}
+      ],
+      tarefas:[
+        {id:'k5', nome:'Guardar os lápis de cor', descricao:'Guardar os lápis na caixinha depois de usar.', recompensa:1, status:'pendente', prazo:'Hoje'},
+        {id:'k6', nome:'Alimentar o peixinho', descricao:'Dar a ração certinha para o peixinho.', recompensa:1.5, status:'concluida', prazo:'Ontem'}
+      ],
+      solicitacoes:[
+        {id:'s5', nome:'Adesivos de carrinhos', descricao:'Cartela de adesivos da papelaria.', valor:6, status:'pendente'}
+      ]
+    }
+  ],
+  consentimentos:{
+    triagemImagem:true,   /* Art. 14 LGPD — consentimento parental específico e destacado */
+    assistente:true,
+    relatorios:true
+  },
+  notificacoes:[
+    {id:'n1', texto:'Maria concluiu a tarefa "Regar as plantas".', lida:false},
+    {id:'n2', texto:'Nova solicitação de Maria: Figurinhas de dinossauro.', lida:false},
+    {id:'n3', texto:'Meta "Caderno de desenho" foi concluída! 🎉', lida:true}
+  ]
+};
+
+/* ---------- estado da aplicação (somente navegação/UI, não é back-end) ---------- */
+var state = {
+  screen:'login', tuteladoId:'t1', notifOpen:false, expandedGoal:null, senhaVisivel:false, modal:null,
+  tema:'auto',        /* 'light' | 'dark' | 'auto' (acompanha o aparelho) */
+  daltonico:false,    /* paleta segura para daltonismo */
+  escala:1,           /* escala da interface: 1 | 1.15 | 1.3 | 1.5 */
+  pendenteSolic:null, /* solicitação aguardando o alerta reflexivo (nudge) */
+  chat:[],            /* histórico do assistente pedagógico */
+  areaAtual:null      /* 'kids' | 'adulto' — define para onde o app volta ao sair de Acessibilidade */
+};
+
+function tutelado(){ return db.tutelados.find(function(t){return t.id===state.tuteladoId;}) || db.tutelados[0]; }
+function brl(v){ return 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
+function pct(dep,total){ return Math.max(0, Math.min(100, Math.round((dep/total)*100))); }
+function unreadCount(){ return db.notificacoes.filter(function(n){return !n.lida;}).length; }
+function esc(str){ return String(str).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+/* ---------- ADAPTAÇÃO POR FAIXA ETÁRIA ----------
+   Quanto menor a criança, mais elementos lúdicos (mascote, emojis, celebração,
+   linguagem afetiva e tipografia maior). Conforme a idade avança, a interface
+   vai ficando mais próxima da linguagem financeira real usada na área adulta. */
+var FAIXAS = {
+  pequeno:{ /* 5 a 7 anos */
+    classe:'age-small', rotulo:'5 a 7 anos — máximo lúdico',
+    mascote:'🐷', saudacao:function(n){ return 'Oi, '+n+'!'; },
+    labelSaldo:'Meu cofrinho', labelMetas:'Meus sonhos', labelTarefas:'Minhas missões',
+    labelSolic:'Meus pedidos', labelPerfil:'Eu',
+    tituloMetas:'Meus sonhos 🌟', tituloTarefas:'Minhas missões 🧹', tituloSolic:'Meus pedidos 💌',
+    novaMeta:'Criar um sonho novo', novaTarefa:'Criar uma missão', novaSolic:'Pedir uma coisinha',
+    emojiTitulo:true, mostrarPercentual:false, celebrar:true,
+    metaResumo:function(g){ return g.concluida ? 'Você conseguiu! 🎉' : 'Faltam '+brl(g.total-g.dep)+' para conseguir!'; },
+    dicaSaldo:'É o dinheiro que você pode usar agora.'
+  },
+  medio:{ /* 8 a 9 anos */
+    classe:'age-mid', rotulo:'8 a 9 anos — lúdico moderado',
+    mascote:null, saudacao:function(n){ return 'Olá, '+n+'!'; },
+    labelSaldo:'Meu saldo', labelMetas:'Metas', labelTarefas:'Tarefas',
+    labelSolic:'Pedidos', labelPerfil:'Perfil',
+    tituloMetas:'Minhas metas', tituloTarefas:'Minhas tarefas', tituloSolic:'Meus pedidos',
+    novaMeta:'Nova meta', novaTarefa:'Nova tarefa', novaSolic:'Novo pedido',
+    emojiTitulo:true, mostrarPercentual:true, celebrar:true,
+    metaResumo:function(g){ return g.concluida ? 'Meta alcançada! 🎉' : brl(g.dep)+' de '+brl(g.total)+' — faltam '+brl(g.total-g.dep); },
+    dicaSaldo:'Saldo livre para usar ou guardar em uma meta.'
+  },
+  maior:{ /* 10 a 11 anos */
+    classe:'age-big', rotulo:'10 a 11 anos — próximo da linguagem real',
+    mascote:null, saudacao:function(n){ return 'Olá, '+n; },
+    labelSaldo:'Saldo disponível', labelMetas:'Metas', labelTarefas:'Tarefas',
+    labelSolic:'Solicitações', labelPerfil:'Perfil',
+    tituloMetas:'Metas', tituloTarefas:'Tarefas', tituloSolic:'Solicitações',
+    novaMeta:'Nova meta', novaTarefa:'Nova tarefa', novaSolic:'Nova solicitação',
+    emojiTitulo:false, mostrarPercentual:true, celebrar:false,
+    metaResumo:function(g){ return g.concluida ? 'Meta concluída — '+brl(g.total) : brl(g.dep)+' de '+brl(g.total); },
+    dicaSaldo:'Saldo disponível para gastos e aportes em metas.'
+  }
+};
+function ui(){
+  var idade = tutelado().idade;
+  if(idade<=7) return FAIXAS.pequeno;
+  if(idade<=9) return FAIXAS.medio;
+  return FAIXAS.maior;
+}
+
+function go(screen){ state.screen=screen; state.notifOpen=false; render(); window.scrollTo(0,0); }
+function toast(msg){
+  var host=document.getElementById('toast-host');
+  var el=document.createElement('div'); el.className='toast'; el.setAttribute('role','status'); el.textContent=msg;
+  host.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 2600);
+}
+
+/* =====================================================================
+   RENDER — cada tela é uma função que retorna uma string HTML
+   ===================================================================== */
+
+function topbarKids(title){
+  var t = tutelado();
+  return '' +
+  '<div class="topbar">' +
+    '<button class="avatar-chip" data-action="go" data-screen="kids-avatar" aria-label="Personalizar avatar de '+esc(t.nome)+'">'+t.emoji+'</button>' +
+    '<div class="topbar-title">'+esc(title)+'</div>' +
+    '<div style="position:relative">' +
+      '<button class="icon-btn" data-action="toggle-notif" aria-haspopup="true" aria-expanded="'+state.notifOpen+'" aria-label="Notificações">'+icon('bell',20)+
+        (unreadCount()>0 ? '<span class="badge-dot">'+unreadCount()+'</span>' : '') +
+      '</button>' +
+      (state.notifOpen ? notifPanel() : '') +
+    '</div>' +
+  '</div>';
+}
+function topbarAdult(title){
+  return '' +
+  '<div class="topbar">' +
+    '<button class="avatar-chip" data-action="go" data-screen="adulto-perfil" aria-label="Ir para o perfil">'+db.responsavel.emoji+'</button>' +
+    '<div class="topbar-title">'+esc(title)+'</div>' +
+    '<div style="position:relative">' +
+      '<button class="icon-btn" data-action="toggle-notif" aria-haspopup="true" aria-expanded="'+state.notifOpen+'" aria-label="Notificações">'+icon('bell',20)+
+        (unreadCount()>0 ? '<span class="badge-dot">'+unreadCount()+'</span>' : '') +
+      '</button>' +
+      (state.notifOpen ? notifPanel() : '') +
+    '</div>' +
+  '</div>';
+}
+function notifPanel(){
+  var items = db.notificacoes.map(function(n){
+    return '<div class="notif-item">'+(!n.lida?'<span class="notif-dot" aria-hidden="true"></span>':'<span style="width:8px" aria-hidden="true"></span>')+'<span>'+esc(n.texto)+'</span></div>';
+  }).join('');
+  return '<div class="notif-panel" role="dialog" aria-label="Lista de notificações">' +
+    '<h3>Notificações</h3>' +
+    (db.notificacoes.length ? items : '<div class="notif-empty">Nenhuma notificação por aqui.</div>') +
+  '</div>';
+}
+function bottomnavKids(active){
+  var u = ui();
+  var items=[['kids-inicio','home','Início'],['kids-metas','rocket',u.labelMetas],['kids-tarefas','check',u.labelTarefas],['kids-solicitacoes','clipboard',u.labelSolic],['kids-perfil','user',u.labelPerfil]];
+  return '<nav class="bottomnav" aria-label="Navegação principal">' + items.map(function(it){
+    var cur = it[0]===active;
+    return '<button class="nav-btn" data-action="go" data-screen="'+it[0]+'" '+(cur?'aria-current="page"':'')+'>'+icon(it[1],21)+'<span>'+it[2]+'</span></button>';
+  }).join('') + '</nav>';
+}
+function bottomnavAdult(active){
+  var items=[['adulto-solicitacoes','tray','Solicitações'],['adulto-relatorio','chart','Relatório'],['adulto-perfil','user','Perfil']];
+  return '<nav class="bottomnav" aria-label="Navegação principal">' + items.map(function(it){
+    var cur = it[0]===active;
+    return '<button class="nav-btn" data-action="go" data-screen="'+it[0]+'" '+(cur?'aria-current="page"':'')+'>'+icon(it[1],21)+'<span>'+it[2]+'</span></button>';
+  }).join('') + '</nav>';
+}
+
+/* ---------------- LOGIN / CADASTRO / 404 ---------------- */
+function screenLogin(){
+  return '<div class="screen no-nav-pad auth-wrap">' +
+    '<div class="row-between" style="padding-top:14px">' +
+      '<span></span>' +
+      '<button class="btn btn-secondary btn-sm" style="width:auto;gap:6px" data-action="go" data-screen="acessibilidade">'+icon('sparkle',16)+' Acessibilidade</button>' +
+    '</div>' +
+    '<div class="auth-hero" style="padding-top:12px">' +
+      '<div class="logo-mark">'+icon('coin',30)+'</div>' +
+      '<h1>Grana Kids</h1>' +
+      '<p class="muted">Educação financeira em família, com o mundo mostrado do jeitinho de cada idade.</p>' +
+    '</div>' +
+    '<form data-form="login">' +
+      '<div class="field"><label for="f-apelido">Apelido</label><input id="f-apelido" name="apelido" type="text" autocomplete="username" placeholder="Como você é chamado(a)"></div>' +
+      '<div class="field"><label for="f-senha">Senha</label><div class="input-wrap">' +
+        '<input id="f-senha" name="senha" type="'+(state.senhaVisivel?'text':'password')+'" autocomplete="current-password" placeholder="Sua senha" style="padding-right:44px">' +
+        '<button type="button" class="eye-toggle" data-action="toggle-senha" aria-label="'+(state.senhaVisivel?'Ocultar senha':'Mostrar senha')+'">'+icon(state.senhaVisivel?'eyeOff':'eye',18)+'</button>' +
+      '</div></div>' +
+      '<button class="btn btn-primary" type="submit">Entrar</button>' +
+    '</form>' +
+    '<div class="btn-row" style="margin-top:10px">' +
+      '<button class="btn btn-secondary" data-action="go" data-screen="cadastro">Cadastrar</button>' +
+      '<button class="btn btn-ghost" data-action="esqueci-senha" style="width:auto;flex:1">Esqueci minha senha</button>' +
+    '</div>' +
+    '<div class="demo-box">' +
+      '<p><strong>Modo protótipo</strong> — sem conexão real com o back-end. Escolha por qual área deseja entrar para demonstração:</p>' +
+      '<div class="btn-row"><button class="btn btn-secondary btn-sm" data-action="demo-login" data-area="kids" style="flex:1">👧 Área da criança</button>' +
+      '<button class="btn btn-secondary btn-sm" data-action="demo-login" data-area="adulto" style="flex:1">👤 Área do responsável</button></div>' +
+      '<button class="btn btn-ghost btn-sm" data-action="go" data-screen="err404" style="margin-top:2px">Visualizar página de erro 404 (QA)</button>' +
+    '</div>' +
+  '</div>';
+}
+function screenCadastro(){
+  return '<div class="screen no-nav-pad">' +
+    '<div class="back-row" style="margin-top:8px"><button class="icon-btn" data-action="go" data-screen="login" aria-label="Voltar">'+icon('chevronLeft',20)+'</button><h1 style="margin:0">Criar conta</h1></div>' +
+    '<form data-form="cadastro" style="margin-top:16px">' +
+      '<div class="field"><label for="c-apelido">Apelido</label><input id="c-apelido" required></div>' +
+      '<div class="field"><label for="c-nome">Nome completo</label><input id="c-nome" required></div>' +
+      '<div class="field"><label for="c-email">E-mail</label><input id="c-email" type="email" required></div>' +
+      '<div class="field"><label for="c-senha">Senha</label><input id="c-senha" type="password" required></div>' +
+      '<div class="field"><label for="c-senha2">Confirmar senha</label><input id="c-senha2" type="password" required></div>' +
+      '<button class="btn btn-primary" type="submit">Cadastrar</button>' +
+    '</form>' +
+  '</div>';
+}
+function screen404(){
+  return '<div class="screen no-nav-pad" style="display:flex;align-items:center;justify-content:center;text-align:center;min-height:100%">' +
+    '<div>' +
+      '<div style="font-size:56px;line-height:1">🧭</div>' +
+      '<h1 style="margin-top:10px">Página não encontrada</h1>' +
+      '<p class="muted" style="margin:8px 0 20px">Essa página não existe ou foi movida. Vamos te levar para um lugar conhecido.</p>' +
+      '<button class="btn btn-primary" data-action="go" data-screen="login" style="width:auto;padding-left:26px;padding-right:26px">Voltar para o início</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ---------------- ÁREA KIDS ---------------- */
+function goalMiniCard(g){
+  var u = ui();
+  return '<div class="card card-tight">' +
+    '<div class="row-between"><strong>'+esc(g.nome)+'</strong>'+(u.mostrarPercentual? '<span class="muted">'+pct(g.dep,g.total)+'%</span>' : '')+'</div>' +
+    '<div class="progress-track"><div class="progress-fill" style="width:'+pct(g.dep,g.total)+'%"></div></div>' +
+    '<div class="muted">'+esc(u.metaResumo(g))+'</div>' +
+  '</div>';
+}
+function taskMiniRow(t){
+  var pill = t.status==='pendente' ? 'pill-pending' : (t.status==='concluida' ? 'pill-success' : 'pill-danger');
+  var txt = t.status==='pendente' ? 'Pendente' : (t.status==='concluida' ? 'Concluída' : 'Não concluída');
+  return '<div class="card card-tight row-between"><div class="stack"><strong class="ellipsis">'+esc(t.nome)+'</strong><span class="muted">Prazo: '+esc(t.prazo)+'</span></div><span class="pill '+pill+'">'+txt+'</span></div>';
+}
+function reqMiniRow(s){
+  var map = kidReqStatus(s.status);
+  return '<div class="card card-tight row-between"><div class="stack"><strong class="ellipsis">'+esc(s.nome)+'</strong><span class="muted">'+brl(s.valor)+'</span></div><span class="pill '+map.pill+'">'+map.label+'</span></div>';
+}
+function kidReqStatus(status){
+  if(status==='pendente') return {pill:'pill-pending', label:'Aguardando'};
+  if(status==='processando') return {pill:'pill-pending', label:'Em andamento'};
+  if(status==='aprovada') return {pill:'pill-success', label:'Aprovada'};
+  return {pill:'pill-danger', label:'Recusada'};
+}
+
+function screenKidsInicio(){
+  var t=tutelado(); var u=ui();
+  var metas=t.metas.slice(0,3), tarefas=t.tarefas.slice(0,3), reqs=t.solicitacoes.slice(0,3);
+  return topbarKids(u.saudacao(t.nome) + (u.emojiTitulo? ' '+t.emoji : '')) +
+  '<div class="screen">' +
+    (u.mascote? '<div class="mascote" aria-hidden="true"><span class="mascote-bolha">Guarde um pouquinho todo dia!</span><span class="mascote-emoji">'+u.mascote+'</span></div>' : '') +
+    (db.consentimentos.assistente ? '<button class="btn btn-secondary" style="margin-bottom:10px;justify-content:flex-start;gap:8px" data-action="go" data-screen="kids-assistente">🦉 '+(u.classe==='age-small'?'Falar com a coruja':'Tirar uma dúvida com o assistente')+'</button>' : '') +
+    '<div class="saldo-card"><div class="muted">'+esc(u.labelSaldo)+'</div><div class="saldo-valor">'+icon('coin',26)+brl(t.saldo)+'</div><div class="muted" style="margin-top:4px;font-size:12px">'+esc(u.dicaSaldo)+'</div></div>' +
+    '<div class="section-title"><h2>'+esc(u.tituloMetas)+'</h2>'+(t.metas.length>3?'<button class="link-btn" data-action="go" data-screen="kids-metas">Ver mais</button>':'')+'</div>' +
+    (metas.length? metas.map(goalMiniCard).join('') : emptyMini('Você ainda não tem metas. Toque em "'+u.labelMetas+'" para criar a primeira!')) +
+    '<div class="section-title"><h2>'+esc(u.tituloTarefas)+'</h2>'+(t.tarefas.length>3?'<button class="link-btn" data-action="go" data-screen="kids-tarefas">Ver mais</button>':'')+'</div>' +
+    (tarefas.length? tarefas.map(taskMiniRow).join('') : emptyMini('Nenhuma tarefa por aqui ainda.')) +
+    '<div class="section-title"><h2>'+esc(u.tituloSolic)+'</h2>'+(t.solicitacoes.length>3?'<button class="link-btn" data-action="go" data-screen="kids-solicitacoes">Ver mais</button>':'')+'</div>' +
+    (reqs.length? reqs.map(reqMiniRow).join('') : emptyMini('Nenhum pedido enviado ainda.')) +
+  '</div>' + bottomnavKids('kids-inicio');
+}
+function marcaOk(){
+  /* marca de "concluído" desenhada com a cor do próprio status, para continuar
+     legível no tema escuro e na paleta para daltonismo (um emoji seria sempre verde) */
+  return '<span style="display:inline-flex;vertical-align:-3px;margin-left:6px;color:var(--success-ink)">'+icon('check',16)+'</span>';
+}
+function emptyMini(msg){ return '<div class="card card-tight muted" style="text-align:center">'+esc(msg)+'</div>'; }
+
+function screenKidsMetas(){
+  var t=tutelado();
+  var abertas=t.metas.filter(function(g){return !g.concluida;});
+  var concl=t.metas.filter(function(g){return g.concluida;});
+  var u=ui();
+  return topbarKids(u.tituloMetas) +
+  '<div class="screen">' +
+    '<button class="btn btn-primary fab-row" data-action="modal" data-modal="nova-meta">'+icon('plus',18)+' '+esc(u.novaMeta)+'</button>' +
+    '<h2>Em andamento</h2>' +
+    (abertas.length? abertas.map(goalCardFull).join('') : emptyMini('Nenhuma meta em andamento.')) +
+    '<div class="divider"></div>' +
+    '<h2>Concluídas</h2>' +
+    (concl.length? concl.map(function(g){return '<div class="tile tile-success"><div class="tile-title">'+esc(g.nome)+marcaOk()+'</div><div class="tile-desc" style="margin-bottom:0">'+esc(g.descricao)+'</div></div>';}).join('') : emptyMini('Nenhuma meta concluída ainda.')) +
+  '</div>' + bottomnavKids('kids-metas');
+}
+function goalCardFull(g){
+  var expanded = state.expandedGoal===g.id; var u=ui();
+  var rotuloDep = u.classe==='age-small' ? 'Guardar' : 'Depositar';
+  var rotuloRet = u.classe==='age-small' ? 'Tirar' : 'Retirar';
+  return '<div class="card">' +
+    '<div class="row-between"><strong>'+esc(g.nome)+'</strong><button class="icon-btn" style="width:32px;height:32px" data-action="toggle-goal" data-id="'+g.id+'" aria-expanded="'+expanded+'" aria-label="Ver descrição da meta '+esc(g.nome)+'">'+icon(expanded?'chevronDown':'chevronRight',16)+'</button></div>' +
+    (expanded? '<p class="muted" style="margin:6px 0">'+esc(g.descricao)+'</p>' : '') +
+    '<div class="progress-track"><div class="progress-fill" style="width:'+pct(g.dep,g.total)+'%"></div></div>' +
+    '<div class="row-between"><span class="muted">'+esc(u.metaResumo(g))+'</span>'+(u.mostrarPercentual? '<span class="muted">'+pct(g.dep,g.total)+'%</span>' : '')+'</div>' +
+    '<div class="btn-row" style="margin-top:10px">' +
+      '<button class="btn btn-secondary btn-sm" style="flex:1" data-action="modal" data-modal="meta-valor" data-id="'+g.id+'" data-op="retirar">'+rotuloRet+'</button>' +
+      '<button class="btn btn-primary btn-sm" style="flex:1" data-action="modal" data-modal="meta-valor" data-id="'+g.id+'" data-op="depositar">'+rotuloDep+'</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function screenKidsTarefas(){
+  var t=tutelado();
+  var pend=t.tarefas.filter(function(x){return x.status==='pendente';});
+  var ok=t.tarefas.filter(function(x){return x.status==='concluida';});
+  var nok=t.tarefas.filter(function(x){return x.status==='nao_concluida';});
+  var u=ui();
+  return topbarKids(u.tituloTarefas) +
+  '<div class="screen">' +
+    '<button class="btn btn-primary fab-row" data-action="modal" data-modal="nova-tarefa">'+icon('plus',18)+' '+esc(u.novaTarefa)+'</button>' +
+    '<h2>Pendentes</h2>' +
+    (pend.length? pend.map(function(x){return '<div class="tile tile-pending"><div class="tile-title">'+esc(x.nome)+'</div><div class="tile-desc">'+esc(x.descricao)+'</div><div class="tile-foot"><span class="reward">'+icon('coin',15)+brl(x.recompensa)+'</span><button class="btn btn-secondary btn-sm" data-action="modal" data-modal="prova" data-id="'+x.id+'">'+icon('camera',16)+' Enviar prova</button></div></div>';}).join('') : emptyMini('Nenhuma tarefa pendente. 🎉')) +
+    '<div class="divider"></div>' +
+    '<h2>Concluídas</h2>' +
+    (ok.length? ok.map(function(x){return '<div class="tile tile-success"><div class="tile-title">'+esc(x.nome)+marcaOk()+'</div><div class="tile-desc" style="margin-bottom:0">'+esc(x.descricao)+'</div><div class="reward" style="margin-top:8px">'+icon('coin',15)+'+'+brl(x.recompensa)+' conquistado</div></div>';}).join('') : emptyMini('Nenhuma tarefa concluída ainda.')) +
+    '<div class="divider"></div>' +
+    '<h2>Não concluídas</h2>' +
+    (nok.length? nok.map(function(x){return '<div class="tile tile-danger"><div class="tile-title">'+esc(x.nome)+'</div><div class="tile-desc" style="margin-bottom:0">'+esc(x.descricao)+'</div><div class="muted" style="margin-top:8px">'+brl(x.recompensa)+' não conquistado</div></div>';}).join('') : emptyMini('Nenhuma tarefa perdida — bom trabalho!')) +
+  '</div>' + bottomnavKids('kids-tarefas');
+}
+
+function screenKidsSolicitacoes(){
+  var t=tutelado();
+  var order = {pendente:0, processando:1, aprovada:1, recusada:2};
+  var lista = t.solicitacoes.slice().sort(function(a,b){return order[a.status]-order[b.status];});
+  var u=ui();
+  return topbarKids(u.tituloSolic) +
+  '<div class="screen">' +
+    '<button class="btn btn-primary fab-row" data-action="modal" data-modal="nova-solicitacao">'+icon('plus',18)+' '+esc(u.novaSolic)+'</button>' +
+    (lista.length? lista.map(function(s){
+      var map=kidReqStatus(s.status);
+      return '<div class="card"><div class="row-between"><strong>'+esc(s.nome)+'</strong><span class="pill '+map.pill+'">'+map.label+'</span></div>' +
+        '<p class="muted" style="margin:6px 0">'+esc(s.descricao)+'</p>' +
+        '<strong>'+brl(s.valor)+'</strong></div>';
+    }).join('') : emptyMini('Nenhuma solicitação ainda. Toque em "Nova solicitação" para pedir algo ao seu responsável.')) +
+  '</div>' + bottomnavKids('kids-solicitacoes');
+}
+
+function screenKidsPerfil(){
+  var t=tutelado(); var u=ui();
+  return topbarKids(u.labelPerfil) +
+  '<div class="screen">' +
+    '<div class="avatar-lg" style="background:'+t.corAvatar+'">'+t.emoji+'</div>' +
+    '<h2 style="text-align:center;margin-top:12px">'+esc(t.nome)+'</h2>' +
+    '<p class="muted" style="text-align:center">'+t.idade+' anos</p>' +
+    '<button class="btn btn-secondary" style="margin-top:16px" data-action="go" data-screen="kids-avatar">Personalizar avatar</button>' +
+    '<button class="btn btn-secondary" style="margin-top:8px" data-action="go" data-screen="acessibilidade">'+icon('sparkle',16)+' Acessibilidade e tema</button>' +
+    '<div class="divider"></div>' +
+    '<div class="card"><div class="row-between"><span class="muted">Apelido</span><strong>'+esc(t.nome.toLowerCase())+'</strong></div></div>' +
+    '<button class="btn btn-danger-outline" style="margin-top:14px" data-action="sair">Sair da minha conta</button>' +
+  '</div>' + bottomnavKids('kids-perfil');
+}
+function screenKidsAvatar(){
+  var t=tutelado();
+  var cores=['#E3F3EC','#FDF0D2','#FDE7E2','#E7E1F5','#DDEFFB'];
+  var roupas=['👒','🧢','🕶️','🎽','🥻','⛑️'];
+  return '' +
+  '<div class="topbar"><button class="icon-btn" data-action="go" data-screen="kids-perfil" aria-label="Voltar">'+icon('chevronLeft',20)+'</button><div class="topbar-title">Personalizar avatar</div><span style="width:42px"></span></div>' +
+  '<div class="screen no-nav-pad">' +
+    '<div class="avatar-lg" style="background:'+t.corAvatar+';font-size:52px">'+t.emoji+' <span style="font-size:26px;margin-left:-14px">'+t.roupa+'</span></div>' +
+    '<p class="muted" style="text-align:center;margin-top:16px">Prévia do protótipo — a personalização completa do avatar será detalhada em uma próxima etapa.</p>' +
+    '<h3 style="margin-top:20px">Cor de fundo</h3>' +
+    '<div class="swatch-row">' + cores.map(function(c){return '<button class="swatch" style="background:'+c+'" aria-pressed="'+(t.corAvatar===c)+'" aria-label="Escolher cor" data-action="avatar-cor" data-cor="'+c+'"></button>';}).join('') + '</div>' +
+    '<h3 style="margin-top:20px">Acessório</h3>' +
+    '<div class="swatch-row">' + roupas.map(function(r){return '<button class="swatch" aria-pressed="'+(t.roupa===r)+'" aria-label="Escolher acessório '+r+'" data-action="avatar-roupa" data-roupa="'+r+'">'+r+'</button>';}).join('') + '</div>' +
+  '</div>' + bottomnavKids('kids-perfil');
+}
+
+/* ---------------- ÁREA ADULTO ---------------- */
+function tuteladoSwitcher(){
+  var t=tutelado();
+  return '<div class="card row-between">' +
+    '<div class="row"><span class="avatar-chip" style="box-shadow:none;background:'+t.corAvatar+'" aria-hidden="true">'+t.emoji+'</span>' +
+      '<div class="stack"><strong>'+esc(t.nome)+'</strong><span class="muted">Saldo: '+brl(t.saldo)+'</span></div></div>' +
+    (db.tutelados.length>1 ? '<div class="chip-select">'+icon('chevronDown',14)+'<select aria-label="Trocar tutelado" data-action="troca-tutelado">' +
+      db.tutelados.map(function(x){return '<option value="'+x.id+'" '+(x.id===t.id?'selected':'')+'>'+esc(x.nome)+'</option>';}).join('') +
+    '</select></div>' : '') +
+  '</div>';
+}
+function screenAdultoSolicitacoes(){
+  var t=tutelado();
+  var pend=t.solicitacoes.filter(function(s){return s.status==='pendente';});
+  var proc=t.solicitacoes.filter(function(s){return s.status==='processando';});
+  var apr=t.solicitacoes.filter(function(s){return s.status==='aprovada';});
+  var rec=t.solicitacoes.filter(function(s){return s.status==='recusada';});
+  return topbarAdult('Solicitações') +
+  '<div class="screen theme-adult-inner">' +
+    tuteladoSwitcher() +
+    '<h2 style="margin-top:18px">Para aprovação</h2>' +
+    (pend.length? pend.map(function(s){return '<div class="tile tile-pending">' +
+      '<div class="tile-title">'+esc(s.nome)+'</div><div class="tile-desc">'+esc(s.descricao)+'</div>' +
+      '<div class="row-between"><strong>'+brl(s.valor)+'</strong></div>' +
+      '<div class="btn-row" style="margin-top:10px">' +
+        '<button class="btn btn-danger-outline btn-sm" style="flex:1" data-action="req-recusar" data-id="'+s.id+'">Recusar</button>' +
+        '<button class="btn btn-success-outline btn-sm" style="flex:1" data-action="req-aprovar" data-id="'+s.id+'">Aprovar</button>' +
+      '</div></div>';}).join('') : emptyMini('Nenhuma solicitação nova.')) +
+    '<h2 style="margin-top:18px">Em processamento</h2>' +
+    (proc.length? proc.map(function(s){return '<div class="tile tile-neutral" style="border:1.5px solid var(--line-adult)">' +
+      '<div class="tile-title">'+esc(s.nome)+'</div><div class="tile-desc">'+esc(s.descricao)+' · '+brl(s.valor)+'</div>' +
+      '<button class="btn btn-primary btn-sm" data-action="req-confirmar" data-id="'+s.id+'">Confirmar conclusão</button></div>';}).join('') : emptyMini('Nada em processamento agora.')) +
+    '<h2 style="margin-top:18px">Aprovadas</h2>' +
+    (apr.length? apr.map(function(s){return reqDoneTile(s,'tile-success');}).join('') : emptyMini('Nenhuma aprovada ainda.')) +
+    '<h2 style="margin-top:18px">Recusadas</h2>' +
+    (rec.length? rec.map(function(s){return reqDoneTile(s,'tile-danger');}).join('') : emptyMini('Nenhuma recusada.')) +
+  '</div>' + bottomnavAdult('adulto-solicitacoes');
+}
+function reqDoneTile(s,cls){ return '<div class="tile '+cls+'"><div class="tile-title">'+esc(s.nome)+'</div><div class="tile-desc" style="margin-bottom:0">'+esc(s.descricao)+' · '+brl(s.valor)+'</div></div>'; }
+
+function donutSVG(percent){
+  var r=32, c=2*Math.PI*r, off=c*(1-percent/100);
+  return '<svg width="88" height="88" viewBox="0 0 88 88" aria-hidden="true">' +
+    '<circle cx="44" cy="44" r="'+r+'" fill="none" stroke="var(--line-adult)" stroke-width="10"/>' +
+    '<circle cx="44" cy="44" r="'+r+'" fill="none" stroke="var(--primary-dark)" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 44 44)"/>' +
+    '<text x="44" y="49" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)" font-family="Nunito Sans, sans-serif">'+percent+'%</text>' +
+  '</svg>';
+}
+function screenAdultoRelatorio(){
+  var t=tutelado();
+  var metasOk=t.metas.filter(function(g){return g.concluida;}).length;
+  var metasNok=t.metas.filter(function(g){return !g.concluida;}).length;
+  var tarOk=t.tarefas.filter(function(x){return x.status==='concluida';}).length;
+  var tarNok=t.tarefas.filter(function(x){return x.status==='nao_concluida';}).length;
+  var totalTar = tarOk+tarNok+t.tarefas.filter(function(x){return x.status==='pendente';}).length;
+  var sucesso = totalTar? Math.round((tarOk/(tarOk+tarNok||1))*100) : 0;
+  var atendidas = t.solicitacoes.filter(function(s){return s.status==='aprovada'||s.status==='recusada';}).length;
+  var movimentado = t.solicitacoes.filter(function(s){return s.status==='aprovada';}).reduce(function(a,s){return a+s.valor;},0) + t.tarefas.filter(function(x){return x.status==='concluida';}).reduce(function(a,x){return a+x.recompensa;},0);
+  return topbarAdult('Relatório') +
+  '<div class="screen">' +
+    '<div class="card row-between">' +
+      '<div class="row"><span class="avatar-chip" style="box-shadow:none;background:'+t.corAvatar+'" aria-hidden="true">'+t.emoji+'</span><strong>'+esc(t.nome)+'</strong></div>' +
+      (db.tutelados.length>1? '<div class="chip-select">'+icon('chevronDown',14)+'<select aria-label="Trocar tutelado" data-action="troca-tutelado">'+db.tutelados.map(function(x){return '<option value="'+x.id+'" '+(x.id===t.id?'selected':'')+'>'+esc(x.nome)+'</option>';}).join('')+'</select></div>' : '') +
+    '</div>' +
+    '<button class="btn btn-secondary" style="margin:10px 0 4px" data-action="modal" data-modal="add-saldo">'+icon('plus',16)+' Adicionar saldo</button>' +
+    '<div class="stat-grid">' +
+      '<div class="stat-box"><div class="stat-num">'+metasOk+'</div><div class="stat-label">Metas alcançadas</div></div>' +
+      '<div class="stat-box"><div class="stat-num">'+metasNok+'</div><div class="stat-label">Metas em andamento</div></div>' +
+      '<div class="stat-box"><div class="stat-num">'+tarOk+'</div><div class="stat-label">Tarefas concluídas</div></div>' +
+      '<div class="stat-box"><div class="stat-num">'+tarNok+'</div><div class="stat-label">Tarefas não concluídas</div></div>' +
+      '<div class="stat-box"><div class="stat-num">'+atendidas+'</div><div class="stat-label">Solicitações atendidas</div></div>' +
+      '<div class="stat-box"><div class="stat-num">'+brl(t.saldo)+'</div><div class="stat-label">Saldo atual</div></div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<h3>Taxa de sucesso nas tarefas</h3>' +
+      '<div class="donut-wrap">' + donutSVG(sucesso) +
+        '<div class="donut-legend">' +
+          '<span><span class="legend-dot" style="background:var(--primary-dark)"></span>Concluídas</span>' +
+          '<span><span class="legend-dot" style="background:var(--line-adult)"></span>Não concluídas</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card"><h3>Valor total movimentado</h3><div class="stat-num" style="margin-top:4px">'+brl(movimentado)+'</div><p class="muted" style="margin-top:4px">Soma de compras aprovadas e recompensas de tarefas concluídas.</p></div>' +
+    '<div class="card"><h3>Depósitos por meta</h3>' +
+      t.metas.map(function(g){return '<div style="margin:10px 0"><div class="row-between"><span>'+esc(g.nome)+'</span><span class="muted">'+brl(g.dep)+' / '+brl(g.total)+'</span></div><div class="progress-track"><div class="progress-fill" style="width:'+pct(g.dep,g.total)+'%"></div></div></div>';}).join('') +
+    '</div>' +
+  '</div>' + bottomnavAdult('adulto-relatorio');
+}
+
+function screenAdultoPerfil(){
+  return topbarAdult('Perfil') +
+  '<div class="screen">' +
+    '<div class="avatar-lg">'+db.responsavel.emoji+'</div>' +
+    '<h2 style="text-align:center;margin-top:12px">'+esc(db.responsavel.nome)+'</h2>' +
+    '<p class="muted" style="text-align:center">@'+esc(db.responsavel.apelido)+'</p>' +
+    '<button class="btn btn-primary fab-row" data-action="modal" data-modal="add-tutelado">'+icon('plus',18)+' Adicionar tutelado</button>' +
+    '<h3>Tutelados</h3>' +
+    db.tutelados.map(function(x){return '<div class="card row-between">' +
+      '<div class="row"><span class="avatar-chip" style="box-shadow:none;background:'+x.corAvatar+'" aria-hidden="true">'+x.emoji+'</span><div class="stack"><strong>'+esc(x.nome)+'</strong><span class="muted">'+x.idade+' anos</span></div></div>' +
+      '<div class="row"><button class="icon-btn" style="width:36px;height:36px" data-action="modal" data-modal="editar-tutelado" data-id="'+x.id+'" aria-label="Editar '+esc(x.nome)+'">'+icon('pencil',16)+'</button>' +
+      '<button class="icon-btn" style="width:36px;height:36px;color:var(--danger)" data-action="excluir-tutelado" data-id="'+x.id+'" aria-label="Excluir '+esc(x.nome)+'">'+icon('trash',16)+'</button></div>' +
+    '</div>';}).join('') +
+    '<div class="divider"></div>' +
+    '<button class="btn btn-secondary" data-action="go" data-screen="acessibilidade">'+icon('sparkle',16)+' Acessibilidade e tema</button>' +
+    '<button class="btn btn-secondary" style="margin-top:8px" data-action="go" data-screen="adulto-privacidade">Privacidade e consentimento (LGPD)</button>' +
+    '<div class="card muted" style="margin-top:10px">Personalização de avatar do responsável — não é foco desta etapa do protótipo.</div>' +
+    '<button class="btn btn-danger-outline" style="margin-top:6px" data-action="sair">Sair da conta</button>' +
+  '</div>' + bottomnavAdult('adulto-perfil');
+}
+
+/* ---------------- PRIVACIDADE E CONSENTIMENTO (LGPD Art. 14) ---------------- */
+function screenPrivacidade(){
+  var c = db.consentimentos;
+  function linha(chave, titulo, desc){
+    return '<div class="opt-row">' +
+      '<div class="opt-text"><strong>'+esc(titulo)+'</strong><span>'+esc(desc)+'</span></div>' +
+      '<button class="switch" role="switch" aria-checked="'+c[chave]+'" data-action="toggle-consent" data-chave="'+chave+'" aria-label="'+esc(titulo)+'"><span class="knob"></span></button>' +
+    '</div>';
+  }
+  return '' +
+  '<div class="topbar">' +
+    '<button class="icon-btn" data-action="go" data-screen="adulto-perfil" aria-label="Voltar">'+icon('chevronLeft',20)+'</button>' +
+    '<div class="topbar-title">Privacidade</div><span style="width:42px"></span>' +
+  '</div>' +
+  '<div class="screen">' +
+    '<div class="card">' +
+      '<h3 style="margin-bottom:6px">Consentimento do responsável</h3>' +
+      '<p class="muted">O tratamento de dados de crianças exige consentimento específico e destacado de pelo menos um dos pais ou responsável legal (Art. 14 da Lei nº 13.709/2018). Você pode revogar qualquer permissão a qualquer momento.</p>' +
+    '</div>' +
+    '<div class="card">' +
+      linha('triagemImagem','Fotos de tarefas','A foto é analisada no próprio aparelho e não é enviada para servidores. Só o resultado (concluída ou não) segue para você.') +
+      linha('assistente','Assistente pedagógico','Permite que a criança faça perguntas ao assistente com respostas revisadas e filtros de segurança.') +
+      linha('relatorios','Relatórios de aprendizagem','Gera os indicadores de metas e tarefas exibidos na aba Relatório.') +
+    '</div>' +
+    '<div class="card">' +
+      '<h3 style="margin-bottom:6px">Como os dados são protegidos</h3>' +
+      '<p class="muted" style="margin-bottom:8px">• Processamento no dispositivo: nenhuma imagem de menor trafega para a nuvem.</p>' +
+      '<p class="muted" style="margin-bottom:8px">• Minimização: coletamos apenas o necessário para o funcionamento educativo.</p>' +
+      '<p class="muted" style="margin-bottom:8px">• Pseudoanonimização e criptografia dos dados sensíveis em repouso.</p>' +
+      '<p class="muted">• Não há serviço bancário real: todos os valores são simulados para fins educativos.</p>' +
+    '</div>' +
+    '<button class="btn btn-danger-outline" data-action="revogar-tudo">Revogar todos os consentimentos</button>' +
+  '</div>' + bottomnavAdult('adulto-perfil');
+}
+
+/* ---------------- ASSISTENTE PEDAGÓGICO (com guardrails) ---------------- */
+var PERGUNTAS = [
+  {q:'O que é poupar?', a:'Poupar é guardar um pouquinho do seu dinheiro hoje para conseguir uma coisa maior depois. Cada moeda que você guarda deixa a sua meta mais perto!'},
+  {q:'Por que preciso pedir para comprar?', a:'Porque aqui vocês decidem juntos. Você escolhe o que quer e explica o motivo; o seu responsável confere e aprova. Assim você treina a decisão com segurança.'},
+  {q:'Como consigo mais moedas?', a:'Concluindo as tarefas combinadas em casa e enviando a foto da tarefa pronta. Cada tarefa tem uma recompensa que entra no seu saldo.'},
+  {q:'Quanto falta para a minha meta?', a:null}
+];
+function screenKidsAssistente(){
+  var t=tutelado(); var u=ui();
+  var historico = state.chat.length ? state.chat.map(function(m){
+    var meu = m.de==='crianca';
+    return '<div style="display:flex;justify-content:'+(meu?'flex-end':'flex-start')+';margin-bottom:8px">' +
+      '<div class="card card-tight" style="max-width:82%;margin:0;'+(meu?'background:var(--primary-soft)':'')+'">' +
+        (meu? '' : '<div class="muted" style="font-size:11px;margin-bottom:2px">Assistente</div>') +
+        esc(m.texto) +
+      '</div></div>';
+  }).join('') : '<div class="empty-state"><span class="big-emoji">🦉</span>Toque em uma pergunta abaixo para começar a conversa.</div>';
+
+  return '' +
+  '<div class="topbar">' +
+    '<button class="icon-btn" data-action="go" data-screen="kids-inicio" aria-label="Voltar">'+icon('chevronLeft',20)+'</button>' +
+    '<div class="topbar-title">'+(u.emojiTitulo? 'Coruja do dinheiro 🦉' : 'Assistente')+'</div><span style="width:42px"></span>' +
+  '</div>' +
+  '<div class="screen">' +
+    '<div class="card card-tight muted" style="font-size:12.5px">Esta conversa usa respostas revisadas por adultos. O assistente não fala sobre compras fora do app, não pede dados pessoais e não aprova pedidos.</div>' +
+    '<div style="margin:14px 0">' + historico + '</div>' +
+    '<h3>Perguntas que eu sei responder</h3>' +
+    PERGUNTAS.map(function(pp,i){
+      return '<button class="btn btn-secondary" style="margin-bottom:8px;text-align:left;justify-content:flex-start" data-action="chat-perguntar" data-idx="'+i+'">'+esc(pp.q)+'</button>';
+    }).join('') +
+    (state.chat.length ? '<button class="btn btn-ghost" data-action="chat-limpar">Limpar conversa</button>' : '') +
+    '<div class="field" style="margin-top:14px">' +
+      '<label for="chat-livre">Escrever uma pergunta</label>' +
+      '<input id="chat-livre" type="text" placeholder="Disponível na versão final" disabled>' +
+      '<div class="hint">No app final, um modelo de linguagem supervisionado responde aqui, com filtros de segurança e linguagem adequada à idade.</div>' +
+    '</div>' +
+  '</div>' + bottomnavKids('kids-inicio');
+}
+
+/* ---------------- ACESSIBILIDADE E TEMA (compartilhada) ---------------- */
+var ESCALAS = [
+  {v:1,    nome:'Padrão', dica:'tamanho original das telas.'},
+  {v:1.15, nome:'Grande', dica:'bom para quem força a vista para ler valores.'},
+  {v:1.3,  nome:'Maior',  dica:'letras e botões bem destacados.'},
+  {v:1.5,  nome:'Máximo', dica:'baixa visão — mostra menos conteúdo por tela.'}
+];
+function escalaAtual(){
+  for(var i=0;i<ESCALAS.length;i++){ if(Math.abs(ESCALAS[i].v-state.escala)<0.001) return ESCALAS[i]; }
+  return ESCALAS[0];
+}
+/* ---------- MOTOR DE INTERVENÇÃO PEDAGÓGICA (NUDGE) ----------
+   Traduz um gasto pretendido em impacto concreto sobre a meta mais próxima da
+   criança, para que a decisão seja tomada com consciência da consequência.
+   A decisão final continua sendo da criança (enviar) e do responsável (aprovar). */
+function calcularNudge(valor){
+  var t = tutelado();
+  var abertas = t.metas.filter(function(g){ return !g.concluida; })
+                       .sort(function(a,b){ return (b.dep/b.total)-(a.dep/a.total); });
+  var meta = abertas[0] || null;
+  /* ganho semanal estimado pelo que a criança costuma receber em tarefas */
+  var ganhoSemanal = t.tarefas.reduce(function(acc,x){ return acc + x.recompensa; }, 0);
+  if(ganhoSemanal<=0){ ganhoSemanal = 5; }
+  var semanas = Math.max(1, Math.ceil(valor / ganhoSemanal));
+  var restante = meta ? Math.max(0, meta.total - meta.dep) : 0;
+  return {
+    meta: meta,
+    semanas: semanas,
+    restante: restante,
+    sobra: Math.max(0, t.saldo - valor),
+    comprometeSaldo: valor > t.saldo
+  };
+}
+
+function screenAcessibilidade(){
+  var voltar = state.areaAtual==='adulto' ? 'adulto-perfil' : (state.areaAtual==='kids' ? 'kids-perfil' : 'login');
+  var isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  var isCb = state.daltonico;
+  var nav = state.areaAtual==='adulto' ? bottomnavAdult('adulto-perfil') : (state.areaAtual==='kids' ? bottomnavKids('kids-perfil') : '');
+  return '' +
+  '<div class="topbar">' +
+    '<button class="icon-btn" data-action="go" data-screen="'+voltar+'" aria-label="Voltar">'+icon('chevronLeft',20)+'</button>' +
+    '<div class="topbar-title">Acessibilidade</div><span style="width:42px"></span>' +
+  '</div>' +
+  '<div class="screen'+(nav? '' : ' no-nav-pad')+'">' +
+    '<div class="card">' +
+      '<h3 style="margin-bottom:10px">Aparência</h3>' +
+      '<div class="opt-row">' +
+        '<div class="opt-text"><strong>Tema escuro</strong><span>Fundo escuro, mais confortável à noite e para quem tem sensibilidade à luz.</span></div>' +
+        '<button class="switch" role="switch" aria-checked="'+isDark+'" data-action="toggle-tema" aria-label="Ativar tema escuro"><span class="knob"></span></button>' +
+      '</div>' +
+      '<div class="opt-row" style="display:block">' +
+        '<div class="opt-text" style="margin-bottom:8px"><strong>Escolha rápida</strong><span>O tema também acompanha a preferência do seu aparelho.</span></div>' +
+        '<div class="seg" role="group" aria-label="Escolher tema">' +
+          '<button data-action="set-tema" data-tema="light" aria-pressed="'+(state.tema==='light')+'">Claro</button>' +
+          '<button data-action="set-tema" data-tema="dark" aria-pressed="'+(state.tema==='dark')+'">Escuro</button>' +
+          '<button data-action="set-tema" data-tema="auto" aria-pressed="'+(state.tema==='auto')+'">Automático</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<h3 style="margin-bottom:6px">Escala da interface</h3>' +
+      '<p class="muted" style="margin-bottom:10px">Aumenta letras, botões e caixas de uma vez só. O texto é redesenhado em vetor, então continua nítido em qualquer tamanho.</p>' +
+      '<div class="seg" role="group" aria-label="Escolher tamanho da interface">' +
+        ESCALAS.map(function(op){
+          return '<button data-action="set-escala" data-escala="'+op.v+'" aria-pressed="'+(Math.abs(state.escala-op.v)<0.001)+'">'+op.nome+'</button>';
+        }).join('') +
+      '</div>' +
+      '<p class="muted" style="margin-top:10px">Em uso: <strong>'+Math.round(state.escala*100)+'%</strong> — '+esc(escalaAtual().dica)+'</p>' +
+    '</div>' +
+    '<div class="card">' +
+      '<h3 style="margin-bottom:10px">Daltonismo</h3>' +
+      '<div class="opt-row">' +
+        '<div class="opt-text"><strong>Paleta para daltonismo</strong><span>Troca verde e vermelho por azul, laranja e roxo — cores distinguíveis na deuteranopia e na protanopia.</span></div>' +
+        '<button class="switch" role="switch" aria-checked="'+isCb+'" data-action="toggle-daltonico" aria-label="Ativar paleta para daltonismo"><span class="knob"></span></button>' +
+      '</div>' +
+      '<p class="muted" style="margin-top:10px">Mesmo com a paleta normal, nenhum estado do app depende só da cor: todo cartão traz também um texto de status (Pendente, Concluída, Recusada) e um ícone.</p>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
+        '<span class="pill pill-pending">Pendente</span>' +
+        '<span class="pill pill-success">Concluída</span>' +
+        '<span class="pill pill-danger">Recusada</span>' +
+      '</div>' +
+    '</div>' +
+    (state.areaAtual!=='kids' ? '' :
+      '<div class="card">' +
+        '<h3 style="margin-bottom:6px">Linguagem da interface</h3>' +
+        '<p class="muted">Esta conta tem '+tutelado().idade+' anos, então o app está no modo <strong>'+esc(ui().rotulo)+'</strong>. Quanto menor a criança, mais mascote, emojis e frases de incentivo; conforme cresce, a interface vai usando a linguagem financeira real.</p>' +
+      '</div>') +
+  '</div>' + nav;
+}
+
+/* =====================================================================
+   MODAIS (sheets)
+   ===================================================================== */
+function modalHtml(kind, ctx){
+  var t = tutelado();
+  if(kind==='nova-meta'){
+    return sheetWrap('Nova meta', '' +
+      field('nome','Nome da meta','text') + field('descricao','Descrição','textarea') + field('total','Valor total (R$)','number') +
+      '<button class="btn btn-primary" data-action="salvar-meta">Criar meta</button>');
+  }
+  if(kind==='meta-valor'){
+    var g=t.metas.find(function(x){return x.id===ctx.id;});
+    var isDep = ctx.op==='depositar';
+    var maxDep = Math.min(t.saldo, g.total-g.dep);
+    var limite = isDep ? maxDep : g.dep;
+    return sheetWrap((isDep?'Depositar em ':'Retirar de ')+'"'+esc(g.nome)+'"', '' +
+      '<p class="muted" style="margin-bottom:14px">Guardado nesta meta: '+brl(g.dep)+' de '+brl(g.total)+'<br>Seu saldo livre: '+brl(t.saldo)+'</p>' +
+      (limite<=0 ? '<div class="card card-tight muted" style="text-align:center">'+(isDep? 'Esta meta já está completa ou você não tem saldo livre.' : 'Não há valor guardado para retirar.')+'</div>'
+                 : field('valor','Valor (R$)','number',undefined,{max:limite.toFixed(2), hint:'Máximo permitido agora: '+brl(limite)}) ) +
+      '<button class="btn btn-primary" data-action="confirmar-meta-valor" data-id="'+g.id+'" data-op="'+ctx.op+'">Confirmar</button>');
+  }
+  if(kind==='nova-tarefa'){
+    return sheetWrap('Nova tarefa', '' +
+      field('nome','Nome da tarefa','text') + field('descricao','Descrição','textarea') + field('recompensa','Recompensa (R$)','number') +
+      '<button class="btn btn-primary" data-action="salvar-tarefa">Criar tarefa</button>');
+  }
+  if(kind==='prova'){
+    if(!db.consentimentos.triagemImagem){
+      return sheetWrap('Envio de foto desativado', '' +
+        '<p class="muted" style="margin-bottom:14px">O seu responsável desativou a análise de fotos de tarefas nas configurações de privacidade. Peça para ele confirmar a tarefa de outro jeito.</p>' +
+        '<button class="btn btn-primary" data-action="close-modal">Entendi</button>');
+    }
+    return sheetWrap('Enviar prova de conclusão', '' +
+      '<p class="muted" style="margin-bottom:14px">No app real, uma foto seria analisada por um modelo de visão computacional on-device (triagem local, sem enviar imagens brutas à nuvem) antes de seguir para a confirmação do responsável.</p>' +
+      '<div class="card card-tight" style="text-align:center;border:1.5px dashed var(--line)">'+icon('camera',26)+'<div class="muted" style="margin-top:6px">Simulação de foto anexada</div></div>' +
+      '<button class="btn btn-primary" style="margin-top:14px" data-action="enviar-prova" data-id="'+ctx.id+'">Enviar prova (simulação)</button>');
+  }
+  if(kind==='nova-solicitacao'){
+    return sheetWrap('Nova solicitação', '' +
+      field('nome','O que você quer pedir?','text') + field('descricao','Descrição','textarea') + field('valor','Valor (R$)','number') +
+      '<button class="btn btn-primary" data-action="salvar-solicitacao">Enviar ao responsável</button>');
+  }
+  if(kind==='nudge'){
+    var ps = state.pendenteSolic || {nome:'', valor:0};
+    var nd = calcularNudge(ps.valor);
+    var pequeno = ui().classe==='age-small';
+    var corpo = '';
+    if(nd.meta){
+      corpo += '<p style="margin-bottom:12px">' + (pequeno
+        ? 'Se você gastar '+brl(ps.valor)+' agora, o seu sonho <strong>'+esc(nd.meta.nome)+'</strong> pode demorar mais <strong>'+nd.semanas+(nd.semanas>1?' semanas':' semana')+'</strong> para chegar.'
+        : 'Gastar '+brl(ps.valor)+' agora adia em cerca de <strong>'+nd.semanas+(nd.semanas>1?' semanas':' semana')+'</strong> a sua meta <strong>'+esc(nd.meta.nome)+'</strong>, que ainda precisa de '+brl(nd.restante)+'.') + '</p>';
+      corpo += '<div class="card card-tight" style="margin-bottom:12px">' +
+        '<div class="row-between"><strong>'+esc(nd.meta.nome)+'</strong><span class="muted">'+pct(nd.meta.dep,nd.meta.total)+'%</span></div>' +
+        '<div class="progress-track"><div class="progress-fill" style="width:'+pct(nd.meta.dep,nd.meta.total)+'%"></div></div>' +
+        '<div class="muted">'+brl(nd.meta.dep)+' de '+brl(nd.meta.total)+'</div></div>';
+    } else {
+      corpo += '<p style="margin-bottom:12px">Você ainda não tem uma meta em andamento. Que tal criar uma antes de gastar '+brl(ps.valor)+'?</p>';
+    }
+    corpo += '<p class="muted" style="margin-bottom:14px">Depois deste pedido sobrariam '+brl(nd.sobra)+' no seu saldo.' +
+             (nd.comprometeSaldo ? ' <strong>Atenção: o valor é maior que o seu saldo atual.</strong>' : '') + '</p>';
+    return sheetWrap(pequeno? 'Pensa um pouquinho…' : 'Antes de enviar o pedido', '' +
+      corpo +
+      '<div class="btn-row">' +
+        '<button class="btn btn-secondary" data-action="nudge-repensar">'+(pequeno?'Vou pensar':'Pensar melhor')+'</button>' +
+        '<button class="btn btn-primary" data-action="nudge-confirmar">Enviar assim mesmo</button>' +
+      '</div>' +
+      '<p class="muted" style="margin-top:12px;font-size:12px">Este aviso é só para ajudar você a decidir. Quem aprova o pedido continua sendo o seu responsável.</p>');
+  }
+  if(kind==='add-saldo'){
+    return sheetWrap('Adicionar saldo para '+esc(t.nome), '' +
+      field('valor','Valor (R$)','number') +
+      '<button class="btn btn-primary" data-action="confirmar-add-saldo">Adicionar</button>');
+  }
+  if(kind==='add-tutelado'){
+    return sheetWrap('Adicionar tutelado', '' +
+      field('nome','Nome','text') + field('idade','Idade','number',undefined,{min:'5',max:'11',step:'1',hint:'O Grana Kids atende crianças de 5 a 11 anos.'}) +
+      '<button class="btn btn-primary" data-action="confirmar-add-tutelado">Adicionar</button>');
+  }
+  if(kind==='editar-tutelado'){
+    var x=db.tutelados.find(function(u){return u.id===ctx.id;});
+    return sheetWrap('Editar '+esc(x.nome), '' +
+      field('nome','Nome','text',x.nome) + field('idade','Idade','number',x.idade,{min:'5',max:'11',step:'1'}) +
+      '<button class="btn btn-primary" data-action="confirmar-editar-tutelado" data-id="'+x.id+'">Salvar</button>');
+  }
+  return '';
+}
+function field(name,label,type,value,opts){
+  opts = opts || {};
+  var extra = '';
+  if(type==='number'){ extra += ' min="'+(opts.min!==undefined?opts.min:'0')+'" step="'+(opts.step||'0.01')+'" inputmode="decimal"'; }
+  if(opts.max!==undefined){ extra += ' max="'+opts.max+'"'; }
+  var tag = type==='textarea'
+    ? '<textarea id="mf-'+name+'" name="'+name+'"></textarea>'
+    : '<input id="mf-'+name+'" name="'+name+'" type="'+type+'" value="'+(value!==undefined?esc(value):'')+'"'+extra+'>';
+  var hint = opts.hint ? '<div class="hint">'+esc(opts.hint)+'</div>' : '';
+  return '<div class="field"><label for="mf-'+name+'">'+esc(label)+'</label>'+tag+hint+'</div>';
+}
+function sheetWrap(title, inner){
+  return '<div class="overlay" data-action="overlay-close">' +
+    '<div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(title)+'" data-stop="1">' +
+      '<div class="sheet-handle"></div>' +
+      '<div class="sheet-head"><h2 style="margin:0">'+esc(title)+'</h2><button class="icon-btn" style="width:34px;height:34px" data-action="close-modal" aria-label="Fechar">'+icon('close',16)+'</button></div>' +
+      inner +
+    '</div>' +
+  '</div>';
+}
+
+/* =====================================================================
+   ROTEADOR PRINCIPAL
+   ===================================================================== */
+function aplicarPreferencias(){
+  var root = document.documentElement;
+  var escuro = state.tema==='dark' || (state.tema==='auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  root.setAttribute('data-theme', escuro ? 'dark' : 'light');
+  root.setAttribute('data-cb', state.daltonico ? 'on' : 'off');
+  root.style.setProperty('--ui', String(state.escala));
+}
+function render(){
+  var app=document.getElementById('app');
+  aplicarPreferencias();
+  var isAdult = state.areaAtual==='adulto' && state.screen!=='login' && state.screen!=='cadastro';
+  var classeIdade = (state.areaAtual==='kids') ? ' '+ui().classe : '';
+  var classeEscala = state.escala>=1.3 ? ' ui-xl' : (state.escala>=1.15 ? ' ui-lg' : '');
+  app.className = 'app-shell' + (isAdult ? ' theme-adult' : '') + classeIdade + classeEscala;
+  var html='';
+  switch(state.screen){
+    case 'login': html=screenLogin(); break;
+    case 'cadastro': html=screenCadastro(); break;
+    case 'err404': html=screen404(); break;
+    case 'kids-inicio': html=screenKidsInicio(); break;
+    case 'kids-metas': html=screenKidsMetas(); break;
+    case 'kids-tarefas': html=screenKidsTarefas(); break;
+    case 'kids-solicitacoes': html=screenKidsSolicitacoes(); break;
+    case 'kids-perfil': html=screenKidsPerfil(); break;
+    case 'kids-avatar': html=screenKidsAvatar(); break;
+    case 'adulto-solicitacoes': html=screenAdultoSolicitacoes(); break;
+    case 'adulto-relatorio': html=screenAdultoRelatorio(); break;
+    case 'adulto-perfil': html=screenAdultoPerfil(); break;
+    case 'acessibilidade': html=screenAcessibilidade(); break;
+    case 'kids-assistente': html=screenKidsAssistente(); break;
+    case 'adulto-privacidade': html=screenPrivacidade(); break;
+    default: html=screen404();
+  }
+  if(state.modal){ html += modalHtml(state.modal.kind, state.modal.ctx||{}); }
+  app.innerHTML = html;
+}
+
+/* =====================================================================
+   AÇÕES (delegação de eventos)
+   ===================================================================== */
+document.addEventListener('click', function(e){
+  var target = e.target.closest('[data-action]');
+  if(!target){
+    if(state.notifOpen && !e.target.closest('.notif-panel') && !e.target.closest('[data-action="toggle-notif"]')){ state.notifOpen=false; render(); }
+    return;
+  }
+  var action = target.getAttribute('data-action');
+
+  if(action==='go'){ go(target.getAttribute('data-screen')); return; }
+  if(action==='toggle-notif'){ state.notifOpen=!state.notifOpen; render(); return; }
+  if(action==='toggle-senha'){ state.senhaVisivel=!state.senhaVisivel; render(); return; }
+  if(action==='esqueci-senha'){ toast('Em breve: recuperação de senha por e-mail.'); return; }
+  if(action==='demo-login'){
+    var area = target.getAttribute('data-area');
+    state.areaAtual = area;
+    go(area==='kids' ? 'kids-inicio' : 'adulto-solicitacoes'); return;
+  }
+  if(action==='toggle-goal'){ var id=target.getAttribute('data-id'); state.expandedGoal = (state.expandedGoal===id? null : id); render(); return; }
+  if(action==='avatar-cor'){ tutelado().corAvatar = target.getAttribute('data-cor'); render(); return; }
+  if(action==='avatar-roupa'){ tutelado().roupa = target.getAttribute('data-roupa'); render(); return; }
+  if(action==='troca-tutelado'){ return; } /* tratado no 'change' */
+
+  if(action==='toggle-tema'){
+    var escuroAgora = document.documentElement.getAttribute('data-theme')==='dark';
+    state.tema = escuroAgora ? 'light' : 'dark';
+    render(); toast(state.tema==='dark' ? 'Tema escuro ativado.' : 'Tema claro ativado.'); return;
+  }
+  if(action==='set-tema'){
+    state.tema = target.getAttribute('data-tema');
+    render();
+    toast(state.tema==='auto' ? 'O tema vai seguir o seu aparelho.' : (state.tema==='dark'?'Tema escuro ativado.':'Tema claro ativado.'));
+    return;
+  }
+  if(action==='set-escala'){
+    state.escala = parseFloat(target.getAttribute('data-escala'));
+    render();
+    toast('Tamanho da interface: '+Math.round(state.escala*100)+'%.'); return;
+  }
+  if(action==='toggle-daltonico'){
+    state.daltonico = !state.daltonico;
+    render(); toast(state.daltonico ? 'Paleta para daltonismo ativada.' : 'Paleta de cores padrão restaurada.'); return;
+  }
+  if(action==='sair'){
+    state.areaAtual=null; state.modal=null; state.notifOpen=false; state.tuteladoId=db.tutelados[0].id;
+    go('login'); toast('Você saiu da conta.'); return;
+  }
+
+  if(action==='modal'){
+    var ctx={}; if(target.hasAttribute('data-id')) ctx.id=target.getAttribute('data-id'); if(target.hasAttribute('data-op')) ctx.op=target.getAttribute('data-op');
+    state.modal={kind:target.getAttribute('data-modal'), ctx:ctx}; render(); return;
+  }
+  if(action==='close-modal'){ state.modal=null; render(); return; }
+  if(action==='overlay-close'){
+    /* só fecha quando o clique foi realmente no fundo escurecido, nunca dentro da folha */
+    if(e.target.closest('[data-stop]')) return;
+    state.modal=null; render(); return;
+  }
+
+  if(action==='req-aprovar'){ setReqStatus(target.getAttribute('data-id'),'processando'); toast('Solicitação aprovada — aguardando confirmação de consumo.'); return; }
+  if(action==='req-recusar'){ setReqStatus(target.getAttribute('data-id'),'recusada'); toast('Solicitação recusada.'); return; }
+  if(action==='req-confirmar'){ setReqStatus(target.getAttribute('data-id'),'aprovada'); toast('Conclusão confirmada!'); return; }
+
+  if(action==='enviar-prova'){
+    var id=target.getAttribute('data-id'); state.modal=null; render();
+    toast('Enviando foto e analisando com IA on-device…');
+    setTimeout(function(){
+      var tk=tutelado(); var task=tk.tarefas.find(function(x){return x.id===id;});
+      if(task){ task.status='concluida'; tk.saldo+=task.recompensa; toast('Prova validada! +'+brl(task.recompensa)+' creditado (simulação).'); render(); }
+    }, 1100);
+    return;
+  }
+
+  if(action==='salvar-meta'){
+    var nome=val('mf-nome'), descricao=val('mf-descricao'), total=parseFloat(val('mf-total'));
+    if(!nome){ toast('Dê um nome para a sua meta.'); return; }
+    if(!(total>0)){ toast('O valor da meta precisa ser maior que zero.'); return; }
+    tutelado().metas.push({id:'m'+Date.now(), nome:nome, descricao:descricao||'Sem descrição.', total:total, dep:0, concluida:false});
+    state.modal=null; toast('Meta criada!'); render(); return;
+  }
+  if(action==='confirmar-meta-valor'){
+    var id=target.getAttribute('data-id'), op=target.getAttribute('data-op');
+    var v=parseFloat(val('mf-valor')); var tk=tutelado();
+    var g=tk.metas.find(function(x){return x.id===id;});
+    if(!g){ return; }
+    if(!(v>0)){ toast('Digite um valor maior que zero.'); return; }
+    if(op==='depositar'){
+      var maxDep = Math.min(tk.saldo, g.total-g.dep);
+      if(v>maxDep){ toast('Você pode guardar no máximo '+brl(maxDep)+' agora.'); return; }
+      g.dep += v; tk.saldo -= v;
+      if(g.dep>=g.total){ g.concluida=true; toast('🎉 Meta concluída!'); } else { toast('Guardado na meta!'); }
+    } else {
+      if(v>g.dep){ toast('Você só tem '+brl(g.dep)+' guardado nesta meta.'); return; }
+      g.dep -= v; tk.saldo += v; g.concluida = g.dep>=g.total;
+      toast('Valor devolvido ao seu saldo.');
+    }
+    state.modal=null; render(); return;
+  }
+  if(action==='salvar-tarefa'){
+    var n=val('mf-nome'), d=val('mf-descricao'), r=parseFloat(val('mf-recompensa'));
+    if(!n){ toast('Dê um nome para a tarefa.'); return; }
+    if(!(r>0)){ toast('A recompensa precisa ser maior que zero.'); return; }
+    tutelado().tarefas.push({id:'k'+Date.now(), nome:n, descricao:d||'Sem descrição.', recompensa:r, status:'pendente', prazo:'Hoje'});
+    state.modal=null; toast('Tarefa criada!'); render(); return;
+  }
+  if(action==='salvar-solicitacao'){
+    var n2=val('mf-nome'), d2=val('mf-descricao'), v2=parseFloat(val('mf-valor'));
+    if(!n2){ toast('Conte o que você quer pedir.'); return; }
+    if(!(v2>0)){ toast('O valor precisa ser maior que zero.'); return; }
+    /* antes de confirmar, o motor de nudge mostra o impacto nas metas */
+    state.pendenteSolic = {nome:n2, descricao:d2||'Sem descrição.', valor:v2};
+    state.modal = {kind:'nudge', ctx:{}};
+    render(); return;
+  }
+  if(action==='chat-perguntar'){
+    var idx = parseInt(target.getAttribute('data-idx'),10);
+    var pp = PERGUNTAS[idx]; if(!pp) return;
+    var resposta = pp.a;
+    if(resposta===null){
+      var tk3=tutelado();
+      var aberta = tk3.metas.filter(function(g){return !g.concluida;})
+                            .sort(function(a,b){ return (b.dep/b.total)-(a.dep/a.total); })[0];
+      resposta = aberta
+        ? 'Para a meta "'+aberta.nome+'" faltam '+brl(aberta.total-aberta.dep)+'. Você já guardou '+brl(aberta.dep)+' — está em '+pct(aberta.dep,aberta.total)+'% do caminho!'
+        : 'Você ainda não tem uma meta em andamento. Crie uma na aba de metas e eu acompanho o seu progresso!';
+    }
+    state.chat.push({de:'crianca', texto:pp.q});
+    state.chat.push({de:'bot', texto:resposta});
+    render(); return;
+  }
+  if(action==='chat-limpar'){ state.chat=[]; render(); return; }
+  if(action==='toggle-consent'){
+    var chave = target.getAttribute('data-chave');
+    db.consentimentos[chave] = !db.consentimentos[chave];
+    render();
+    toast(db.consentimentos[chave] ? 'Permissão concedida.' : 'Permissão revogada.');
+    return;
+  }
+  if(action==='revogar-tudo'){
+    db.consentimentos.triagemImagem=false; db.consentimentos.assistente=false; db.consentimentos.relatorios=false;
+    render(); toast('Todos os consentimentos foram revogados.'); return;
+  }
+  if(action==='nudge-confirmar'){
+    var ps = state.pendenteSolic; if(!ps){ state.modal=null; render(); return; }
+    var tk2 = tutelado();
+    tk2.solicitacoes.unshift({id:'s'+Date.now(), nome:ps.nome, descricao:ps.descricao, valor:ps.valor, status:'pendente'});
+    db.notificacoes.unshift({id:'n'+Date.now(), texto:'Nova solicitação de '+tk2.nome+': '+ps.nome+'.', lida:false});
+    state.pendenteSolic=null; state.modal=null;
+    toast('Pedido enviado para '+db.responsavel.nome.split(' ')[0]+'.'); render(); return;
+  }
+  if(action==='nudge-repensar'){
+    state.pendenteSolic=null; state.modal=null;
+    toast('Tudo bem! O pedido não foi enviado.'); render(); return;
+  }
+  if(action==='confirmar-add-saldo'){
+    var v3=parseFloat(val('mf-valor'));
+    if(!(v3>0)){ toast('Informe um valor maior que zero.'); return; }
+    tutelado().saldo += v3; state.modal=null; toast('Saldo adicionado!'); render(); return;
+  }
+  if(action==='confirmar-add-tutelado'){
+    var n3=val('mf-nome'), i3=parseInt(val('mf-idade'),10);
+    if(!n3){ toast('Informe o nome do tutelado.'); return; }
+    if(!(i3>=5 && i3<=11)){ toast('A idade precisa estar entre 5 e 11 anos.'); return; }
+    var emojis=['🐨','🦁','🐸','🦄','🐯','🐵','🐶'];
+    var novo={id:'t'+Date.now(), nome:n3, idade:i3, emoji:emojis[db.tutelados.length%emojis.length], corAvatar:'#E3F3EC', saldo:0, roupa:'👒', metas:[], tarefas:[], solicitacoes:[]};
+    db.tutelados.push(novo);
+    state.tuteladoId = novo.id;
+    state.modal=null; toast(n3+' foi adicionado(a)!'); render(); return;
+  }
+  if(action==='confirmar-editar-tutelado'){
+    var id4=target.getAttribute('data-id'); var x=db.tutelados.find(function(u){return u.id===id4;});
+    var novaIdade=parseInt(val('mf-idade'),10);
+    if(val('mf-idade') && !(novaIdade>=5 && novaIdade<=11)){ toast('A idade precisa estar entre 5 e 11 anos.'); return; }
+    x.nome=val('mf-nome')||x.nome; if(novaIdade>=5 && novaIdade<=11){ x.idade=novaIdade; }
+    state.modal=null; toast('Dados atualizados!'); render(); return;
+  }
+  if(action==='excluir-tutelado'){
+    var id5=target.getAttribute('data-id');
+    if(db.tutelados.length<=1){ toast('É preciso manter ao menos um tutelado.'); return; }
+    db.tutelados = db.tutelados.filter(function(u){return u.id!==id5;});
+    if(state.tuteladoId===id5){ state.tuteladoId=db.tutelados[0].id; }
+    toast('Tutelado removido.'); render(); return;
+  }
+});
+
+document.addEventListener('change', function(e){
+  if(e.target.matches('[data-action="troca-tutelado"]')){ state.tuteladoId = e.target.value; render(); }
+});
+document.addEventListener('submit', function(e){
+  var form = e.target.closest('[data-form]'); if(!form) return;
+  e.preventDefault();
+  var kind = form.getAttribute('data-form');
+  if(kind==='login'){ state.areaAtual='kids'; go('kids-inicio'); toast('Login simulado — entrando na área da criança.'); }
+  if(kind==='cadastro'){ toast('Conta criada com sucesso (simulação).'); go('login'); }
+});
+function val(id){ var el=document.getElementById(id); return el? el.value.trim() : ''; }
+function setReqStatus(id, status){
+  var t=tutelado(); var s=t.solicitacoes.find(function(x){return x.id===id;}); if(s) s.status=status; render();
+}
+
+if(window.matchMedia){
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  var onChange = function(){ if(state.tema==='auto'){ aplicarPreferencias(); } };
+  if(mq.addEventListener){ mq.addEventListener('change', onChange); } else if(mq.addListener){ mq.addListener(onChange); }
+}
+render();
+</script>
+</body>
+</html>
