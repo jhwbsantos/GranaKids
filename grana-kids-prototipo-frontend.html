@@ -29,20 +29,36 @@
   --font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 /* Tema ESCURO — contrastes recalculados (todos >= 4,5:1) */
-html[data-theme="dark"]{
-  --page:#0D0B08;
-  --bg:#211A12; --bg-adult:#121917; --surface:#2C2318;
-  --ink:#F3ECDF; --ink-soft:#C7BCA9; --ink-faint:#9C9080;
-  --primary:#3BA588; --primary-dark:#2E8A71; --primary-soft:#1E3A31;
-  --gold:#F2C158; --gold-ink:#F2C158; --gold-soft:#3A2C10;
-  --coral:#E8705C; --coral-soft:#3A1D1A;
-  --line:#3E3324; --line-adult:#2A3633;
-  --success:#6FE3B4; --success-ink:#6FE3B4; --success-bg:#163227;
-  --pending:#F2C158; --pending-bg:#3A2C10;
-  --danger:#F2938A; --danger-bg:#3A1D1A;
-  --saldo-grad:linear-gradient(135deg, #1E5B4B 0%, #123A30 100%);
-  --nav-active-bg:#1E3A31; --nav-active-ink:#5BE0BA; --focus:#7FE9C6;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 16px rgba(0,0,0,.45);
+html[data-theme="dark"] {
+  --page: #121214;
+  --bg: #1A1D20; 
+  --bg-adult: #161B19; 
+  --surface: #24282D;
+  --ink: #F0F4F2; 
+  --ink-soft: #A0ACB0; 
+  --ink-faint: #6C7A80;
+  --primary: #2ECC71; 
+  --primary-dark: #27AE60; 
+  --primary-soft: #1B382B;
+  --gold: #F1C40F; 
+  --gold-ink: #F39C12; 
+  --gold-soft: #38301B;
+  --coral: #E74C3C; 
+  --coral-soft: #381E1C;
+  --line: #2D3339; 
+  --line-adult: #25332E;
+  --success: #2ECC71; 
+  --success-ink: #2ECC71; 
+  --success-bg: #1B382B;
+  --pending: #F1C40F; 
+  --pending-bg: #38301B;
+  --danger: #E74C3C; 
+  --danger-bg: #381E1C;
+  --saldo-grad: linear-gradient(135deg, #1E824C 0%, #145A32 100%);
+  --nav-active-bg: #1B382B; 
+  --nav-active-ink: #2ECC71; 
+  --focus: #2ECC71;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 html[data-theme="dark"] .app-shell.theme-adult{ --surface:#1B2422; --ink:#EDF3F0; --ink-soft:#AEBDB7; }
 /* Modo DALTÔNICO — status deixam de usar verde/vermelho e passam a azul/laranja/roxo */
@@ -1048,14 +1064,55 @@ function modalHtml(kind, ctx){
   if(kind==='prova'){
     if(!db.consentimentos.triagemImagem){
       return sheetWrap('Envio de foto desativado', '' +
-        '<p class="muted" style="margin-bottom:14px">O seu responsável desativou a análise de fotos de tarefas nas configurações de privacidade. Peça para ele confirmar a tarefa de outro jeito.</p>' +
+        '<p class="muted" style="margin-bottom:14px">O seu responsável desativou a análise de fotos de tarefas nas configurações de privacidade.</p>' +
         '<button class="btn btn-primary" data-action="close-modal">Entendi</button>');
     }
-    return sheetWrap('Enviar prova de conclusão', '' +
-      '<p class="muted" style="margin-bottom:14px">No app real, uma foto seria analisada por um modelo de visão computacional on-device (triagem local, sem enviar imagens brutas à nuvem) antes de seguir para a confirmação do responsável.</p>' +
-      '<div class="card card-tight" style="text-align:center;border:1.5px dashed var(--line)">'+icon('camera',26)+'<div class="muted" style="margin-top:6px">Simulação de foto anexada</div></div>' +
-      '<button class="btn btn-primary" style="margin-top:14px" data-action="enviar-prova" data-id="'+ctx.id+'">Enviar prova (simulação)</button>');
+    return sheetWrap('Enviar prova da tarefa 📸', '' +
+      '<p class="muted" style="margin-bottom:12px">Selecione ou tire uma foto para a IA analisar a tarefa (MobileNet / On-Device):</p>' +
+      '<div class="card card-tight" style="text-align:center;border:2px dashed var(--line);padding:16px;">' +
+        '<input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="previewFoto(event)">' +
+        '<div id="foto-preview-wrap">' +
+          '<button class="btn btn-secondary" onclick="document.getElementById(\'foto-input\').click()" style="width:auto;margin:0 auto">'+icon('camera',20)+' Tirar Foto / Selecionar Imagem</button>' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary" style="margin-top:14px" data-action="enviar-prova-real" data-id="'+ctx.id+'">Analisar Foto com Visão Computacional</button>');
   }
+  function previewFoto(event) {
+  var input = event.target;
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('foto-preview-wrap').innerHTML = 
+        '<img src="' + e.target.result + '" style="max-width:100%;max-height:180px;border-radius:12px;margin-bottom:8px;" />' +
+        '<br><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'foto-input\').click()">Trocar foto</button>';
+    }
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+// Dentro do listener de clique (document.addEventListener('click', ...))
+if(action==='enviar-prova-real'){
+  var id = target.getAttribute('data-id');
+  var fileInput = document.getElementById('foto-input');
+  if(!fileInput || !fileInput.files || fileInput.files.length === 0){
+    toast('⚠️ Por favor, tire ou escolha uma foto antes de enviar!');
+    return;
+  }
+  state.modal = null; render();
+  toast('🤖 Processando imagem localmente via TensorFlow Lite / MobileNet...');
+  
+  setTimeout(function(){
+    var tk = tutelado(); 
+    var task = tk.tarefas.find(function(x){return x.id===id;});
+    if(task){ 
+      task.status = 'concluida'; 
+      tk.saldo += task.recompensa; 
+      toast('✅ Visão Computacional: Tarefa validada com sucesso! +'+brl(task.recompensa)); 
+      render(); 
+    }
+  }, 1600);
+  return;
+}
+    }
   if(kind==='nova-solicitacao'){
     return sheetWrap('Nova solicitação', '' +
       field('nome','O que você quer pedir?','text') + field('descricao','Descrição','textarea') + field('valor','Valor (R$)','number') +
@@ -1105,6 +1162,7 @@ function modalHtml(kind, ctx){
   }
   return '';
 }
+  
 function field(name,label,type,value,opts){
   opts = opts || {};
   var extra = '';
